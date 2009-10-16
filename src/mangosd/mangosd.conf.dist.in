@@ -1410,6 +1410,20 @@ Arena.ArenaSeason.ID = 1
 Arena.ArenaSeason.InProgress = 1
 
 ###################################################################################################################
+# OpenMP Config
+#
+#    OpenMP
+#    MapUpdate.Threads
+#        Number of threads to run if the binary was compiled with OpenMP support.
+#        Default: 4 (recommend)
+#        If online 2000+ : 8
+#        1 (minimum, normal behavior (single-threaded updates)
+#
+###################################################################################################################
+
+MapUpdate.Threads = 4
+
+###################################################################################################################
 # NETWORK CONFIG
 #
 #    Network.Threads

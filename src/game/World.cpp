@@ -20,6 +20,7 @@
     \ingroup world
 */
 
+#include <omp.h>
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
 #include "Config/ConfigEnv.h"
@@ -974,6 +975,7 @@ void World::LoadConfigSettings(bool reload)
     m_configs[CONFIG_ARENA_QUEUE_LEAVE_ANNOUNCER_ENABLE]        = sConfig.GetBoolDefault("Arena.QueueLeaveAnnouncer.Enable", false);
     m_configs[CONFIG_ARENA_SEASON_ID]                           = sConfig.GetIntDefault ("Arena.ArenaSeason.ID", 1);
     m_configs[CONFIG_ARENA_SEASON_IN_PROGRESS]                  = sConfig.GetBoolDefault("Arena.ArenaSeason.InProgress", true);
+    m_configs[CONFIG_NUMTHREADS]                                = sConfig.GetIntDefault ("MapUpdate.Threads",4);
 
     m_configs[CONFIG_OFFHAND_CHECK_AT_TALENTS_RESET] = sConfig.GetBoolDefault("OffhandCheckAtTalentsReset", false);
 

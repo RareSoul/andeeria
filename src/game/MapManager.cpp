@@ -103,8 +103,7 @@ void MapManager::checkAndCorrectGridStatesArray()
         assert(false);                                      // force a crash. Too many errors
 }
 
-Map*
-MapManager::_createBaseMap(uint32 id)
+Map* MapManager::_createBaseMap(uint32 id)
 {
     Map *m = _findMap(id);
 
@@ -240,6 +239,7 @@ bool MapManager::CanPlayerEnter(uint32 mapid, Player* player)
 
 void MapManager::DeleteInstance(uint32 mapid, uint32 instanceId)
 {
+	Guard guard(*this);
     Map *m = _createBaseMap(mapid);
     if (m && m->Instanceable())
         ((MapInstanced*)m)->DestroyInstance(instanceId);
@@ -262,10 +262,24 @@ MapManager::Update(uint32 diff)
     if( !i_timer.Passed() )
         return;
 
-    for(MapMapType::iterator iter=i_maps.begin(); iter != i_maps.end(); ++iter)
+    int i = 0;
+    MapMapType::iterator iter;
+    std::vector<Map*> update_queue(i_maps.size());
+
+    int omp_set_num_threads(sWorld.getConfig(CONFIG_NUMTHREADS));
+
+    for(iter = i_maps.begin(), i = 0; iter != i_maps.end(); ++iter, ++i)
+        update_queue[i] = iter->second;
+/*
+	gomp in gcc <4.4 version cannot parallelise loops using random access iterators
+	so until gcc 4.4 isnt standard, we need the update_queue workaround
+*/
+    // Parallelize map updates.
+    #pragma omp parallel for schedule(dynamic) private(i) shared(update_queue)
+    for(int i = 0; i < i_maps.size(); ++i)
     {
         checkAndCorrectGridStatesArray();                   // debugging code, should be deleted some day
-        iter->second->Update(i_timer.GetCurrent());
+        update_queue[i]->Update(i_timer.GetCurrent());
     }
 
     ObjectAccessor::Instance().Update(i_timer.GetCurrent());
@@ -277,8 +291,21 @@ MapManager::Update(uint32 diff)
 
 void MapManager::DoDelayedMovesAndRemoves()
 {
-    for(MapMapType::iterator iter=i_maps.begin(); iter != i_maps.end(); ++iter)
-        iter->second->DoDelayedMovesAndRemoves();
+    int i = 0;
+    std::vector<Map*> update_queue(i_maps.size());
+    MapMapType::iterator iter;
+
+    for(iter = i_maps.begin(); iter != i_maps.end(); ++iter, ++i)
+        update_queue[i] = iter->second;
+
+    int omp_set_num_threads(sWorld.getConfig(CONFIG_NUMTHREADS));
+
+    // Parallelize map updates.
+    #pragma omp parallel for schedule(dynamic) private(i) shared(update_queue)
+    for(i = 0 ; i < i_maps.size() ; ++i)
+    {
+         update_queue[i]->DoDelayedMovesAndRemoves();
+    }
 }
 
 bool MapManager::ExistMapAndVMap(uint32 mapid, float x,float y)
@@ -300,6 +327,8 @@ bool MapManager::IsValidMAP(uint32 mapid)
 
 void MapManager::UnloadAll()
 {
+	Guard guard(*this);
+
     for(MapMapType::iterator iter=i_maps.begin(); iter != i_maps.end(); ++iter)
         iter->second->UnloadAll(true);
 
@@ -324,6 +353,8 @@ void MapManager::InitMaxInstanceId()
 
 uint32 MapManager::GetNumInstances()
 {
+	Guard guard(*this);
+
     uint32 ret = 0;
     for(MapMapType::iterator itr = i_maps.begin(); itr != i_maps.end(); ++itr)
     {
@@ -338,6 +369,8 @@ uint32 MapManager::GetNumInstances()
 
 uint32 MapManager::GetNumPlayersInInstances()
 {
+	Guard guard(*this);
+
     uint32 ret = 0;
     for(MapMapType::iterator itr = i_maps.begin(); itr != i_maps.end(); ++itr)
     {
