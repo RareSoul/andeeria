@@ -23,7 +23,7 @@
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
 #include "RealmList.h"
-
+#include "revision_andeeria_nr.h"
 #include "Config/ConfigEnv.h"
 #include "Log.h"
 #include "sockets/ListenSocket.h"
@@ -96,7 +96,7 @@ extern int main(int argc, char **argv)
 
         if( strcmp(argv[c],"--version") == 0)
         {
-            printf("%s\n", _FULLVERSION(REVISION_DATE,REVISION_TIME,REVISION_NR,REVISION_ID));
+            printf("%s\n", _FULLVERSION(REVISION_ANDEERIA_NR));
             return 0;
         }
 
@@ -147,7 +147,7 @@ extern int main(int argc, char **argv)
     }
     sLog.Initialize();
 
-    sLog.outString( "%s [realm-daemon]", _FULLVERSION(REVISION_DATE,REVISION_TIME,REVISION_NR,REVISION_ID) );
+    sLog.outString( "%s [realm-daemon]", _FULLVERSION(REVISION_ANDEERIA_NR) );
     sLog.outString( "<Ctrl-C> to stop.\n" );
     sLog.outString("Using configuration file %s.", cfg_file);
 
