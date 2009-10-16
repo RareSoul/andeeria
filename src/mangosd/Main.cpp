@@ -28,6 +28,7 @@
 #include "SystemConfig.h"
 #include "revision.h"
 #include "revision_nr.h"
+#include "revision_andeeria_nr.h"
 #include <openssl/opensslv.h>
 #include <openssl/crypto.h>
 
@@ -93,7 +94,7 @@ extern int main(int argc, char **argv)
 
         if( strcmp(argv[c],"--version") == 0)
         {
-            printf("%s\n", _FULLVERSION(REVISION_DATE,REVISION_TIME,REVISION_NR,REVISION_ID));
+            printf("%s\n", _FULLVERSION(REVISION_ANDEERIA_NR));
             return 0;
         }
 
@@ -143,7 +144,7 @@ extern int main(int argc, char **argv)
         return 1;
     }
 
-    sLog.outString( "%s [world-daemon]", _FULLVERSION(REVISION_DATE,REVISION_TIME,REVISION_NR,REVISION_ID) );
+    sLog.outString( "%s [world-daemon]", _FULLVERSION(REVISION_ANDEERIA_NR) );
     sLog.outString( "<Ctrl-C> to stop.\n\n" );
 
     sLog.outTitle( "MM   MM         MM   MM  MMMMM   MMMM   MMMMM");

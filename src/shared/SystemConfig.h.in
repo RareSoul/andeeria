@@ -20,16 +20,16 @@
 #define MANGOS_SYSTEMCONFIG_H
 
 #ifndef _PACKAGENAME
-#define _PACKAGENAME "MaNGOS"
+#define _PACKAGENAME "Andeeria"
 #endif
 
 #include "Platform/Define.h"
 
 #ifndef _VERSION
 #if PLATFORM == PLATFORM_WINDOWS
-# define _VERSION(REVD,REVT,REVN,REVH) "0.15.0-DEV" " (" REVD " " REVT " Revision " REVN " - " REVH ")"
+# define _VERSION(REVN) "Wotlk 0.2 Milestone" " ( " REVN " )"
 #else
-# define _VERSION(REVD,REVT,REVN,REVH) "@VERSION@" " (" REVD " " REVT " Revision " REVN " - " REVH ")"
+# define _VERSION(REVN) "Wotlk 0.2 Milestone" " ( " REVN " )"
 #endif
 #endif
 
@@ -91,7 +91,7 @@
 # define _REALMD_CONFIG  SYSCONFDIR"realmd.conf"
 #endif
 
-#define _FULLVERSION(REVD,REVT,REVN,REVH) _PACKAGENAME "/" _VERSION(REVD,REVT,REVN,REVH) " for " _ENDIAN_PLATFORM
+#define _FULLVERSION(REVN) _PACKAGENAME "/" _VERSION(REVN) " for " _ENDIAN_PLATFORM
 
 #define DEFAULT_PLAYER_LIMIT 100
 #define DEFAULT_WORLDSERVER_PORT 8085                       //8129
