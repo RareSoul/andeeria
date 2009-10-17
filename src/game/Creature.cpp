@@ -144,14 +144,18 @@ Creature::~Creature()
 void Creature::AddToWorld()
 {
     ///- Register the creature for guid lookup
-    if(!IsInWorld()) ObjectAccessor::Instance().AddObject(this);
+    if(!IsInWorld())
+        GetMap()->GetObjectsStore().insert<Creature>(GetGUID(), (Creature*)this);
+
     Unit::AddToWorld();
 }
 
 void Creature::RemoveFromWorld()
 {
     ///- Remove the creature from the accessor
-    if(IsInWorld()) ObjectAccessor::Instance().RemoveObject(this);
+    if(IsInWorld())
+        GetMap()->GetObjectsStore().erase<Creature>(GetGUID(), (Creature*)NULL);
+
     Unit::RemoveFromWorld();
 }
 
@@ -2095,7 +2099,7 @@ void Creature::SetInCombatWithZone()
             if (pPlayer->isAlive())
             {
                 pPlayer->SetInCombatWith(this);
-                AddThreat(pPlayer, 0.0f);
+                AddThreat(pPlayer);
             }
         }
     }

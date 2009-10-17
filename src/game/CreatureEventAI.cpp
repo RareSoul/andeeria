@@ -949,7 +949,7 @@ void CreatureEventAI::AttackStart(Unit *who)
 
     if (m_creature->Attack(who, MeleeEnabled))
     {
-        m_creature->AddThreat(who, 0.0f);
+        m_creature->AddThreat(who);
         m_creature->SetInCombatWith(who);
         who->SetInCombatWith(m_creature);
 
@@ -1011,7 +1011,7 @@ void CreatureEventAI::MoveInLineOfSight(Unit *who)
             }
             else if (m_creature->GetMap()->IsDungeon())
             {
-                m_creature->AddThreat(who, 0.0f);
+                m_creature->AddThreat(who);
                 who->SetInCombatWith(m_creature);
             }
         }
