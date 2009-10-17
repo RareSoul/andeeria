@@ -418,15 +418,14 @@ scripts/outland/coilfang_reservoir/serpent_shrine/boss_the_lurker_below.cpp \
 scripts/outland/coilfang_reservoir/serpent_shrine/serpent_shrine.cpp \
 scripts/outland/coilfang_reservoir/serpent_shrine/instance_serpent_shrine.cpp \
 scripts/outland/coilfang_reservoir/serpent_shrine/serpent_shrine.h \
-scripts/outland/coilfang_reservoir/underbog/boss_black_stalker.cpp \
-scripts/outland/coilfang_reservoir/underbog/boss_hungarfen.cpp \
-scripts/outland/coilfang_reservoir/underbog/instance_underbog.cpp \
 scripts/outland/coilfang_reservoir/steam_vault/boss_hydromancer_thespia.cpp \
 scripts/outland/coilfang_reservoir/steam_vault/boss_mekgineer_steamrigger.cpp \
 scripts/outland/coilfang_reservoir/steam_vault/boss_warlord_kalithresh.cpp \
 scripts/outland/coilfang_reservoir/steam_vault/instance_steam_vault.cpp \
 scripts/outland/coilfang_reservoir/steam_vault/steam_vault.h \
+scripts/outland/coilfang_reservoir/underbog/boss_black_stalker.cpp \
 scripts/outland/coilfang_reservoir/underbog/boss_hungarfen.cpp \
+scripts/outland/coilfang_reservoir/underbog/instance_underbog.cpp \
 scripts/outland/gruuls_lair/boss_gruul.cpp \
 scripts/outland/gruuls_lair/boss_high_king_maulgar.cpp \
 scripts/outland/gruuls_lair/gruuls_lair.h \
