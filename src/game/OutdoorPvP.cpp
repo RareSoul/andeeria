@@ -65,8 +65,9 @@ void OutdoorPvPObjective::HandlePlayerLeave(Player * plr)
 
 void OutdoorPvPObjective::HandlePlayerActivityChanged(Player * plr)
 {
+    Map* map = m_PvP->GetMap();
     if(m_CapturePointCreature)
-        if(Creature * c = HashMapHolder<Creature>::Find(m_CapturePointCreature))
+        if(Creature * c = map->GetCreature(m_CapturePointCreature))
             if(c->AI())
                 c->AI()->MoveInLineOfSight(plr);
 }
@@ -315,7 +316,8 @@ bool OutdoorPvPObjective::DelCreature(uint32 type)
         return false;
     }
 
-    Creature *cr = HashMapHolder<Creature>::Find(m_Creatures[type]);
+    Map* map = m_PvP->GetMap();
+    Creature *cr = map->GetCreature(m_Creatures[type]);
     if(!cr)
     {
         sLog.outError("OutdoorPvPObjective: Can't find creature guid: %u", GUID_LOPART(m_Creatures[type]));
@@ -338,7 +340,8 @@ bool OutdoorPvPObjective::DelObject(uint32 type)
     if(!m_Objects[type])
         return false;
 
-    GameObject *obj = HashMapHolder<GameObject>::Find(m_Objects[type]);
+    Map* map = m_PvP->GetMap();
+    GameObject *obj = map->GetGameObject(m_Objects[type]);
     if(!obj)
     {
         sLog.outError("OutdoorPvPObjective: Can't find gobject guid: %u", GUID_LOPART(m_Objects[type]));
@@ -356,10 +359,12 @@ bool OutdoorPvPObjective::DelObject(uint32 type)
 
 bool OutdoorPvPObjective::DelCapturePoint()
 {
+    Map* map = m_PvP->GetMap();
+
     if(!m_CapturePoint)
         return false;
 
-    GameObject *obj = HashMapHolder<GameObject>::Find(m_CapturePoint);
+    GameObject *obj = map->GetGameObject(m_CapturePoint);
     if(!obj)
     {
         sLog.outError("OutdoorPvPObjective: Can't find gobject guid: %u", GUID_LOPART(m_CapturePoint));
@@ -513,7 +518,8 @@ bool OutdoorPvPObjective::HandleCaptureCreaturePlayerMoveInLos(Player * p, Creat
         return false;
 
     // check if capture point go is spawned
-    GameObject * cp = HashMapHolder<GameObject>::Find(m_CapturePoint);
+    Map* map = m_PvP->GetMap();
+    GameObject * cp = map->GetGameObject(m_CapturePoint);
     if(!cp)
         return false;
 

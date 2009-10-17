@@ -35,6 +35,7 @@
 #include "Group.h"
 #include "MapRefManager.h"
 #include "DBCEnums.h"
+#include "OutdoorPvPMgr.h"
 
 #include "MapInstanced.h"
 #include "InstanceSaveMgr.h"
@@ -61,6 +62,9 @@ Map::~Map()
 
     if(!m_scriptSchedule.empty())
         sWorld.DecreaseScheduledScriptCount(m_scriptSchedule.size());
+
+    // removes the mappointer from an outdoorpvp-class
+    sOutdoorPvPMgr.NotifyMapDeleted(this);
 }
 
 bool Map::ExistMap(uint32 mapid,int gx,int gy)
@@ -217,6 +221,8 @@ Map::Map(uint32 id, time_t expiry, uint32 InstanceId, uint8 SpawnMode, Map* _par
 
     //lets initialize visibility distance for map
     Map::InitVisibilityDistance();
+    // adds the mappointer to an outdoorpvp-class
+    sOutdoorPvPMgr.NotifyMapAdded(this);
 }
 
 void Map::InitVisibilityDistance()

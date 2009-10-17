@@ -90,6 +90,43 @@ void OutdoorPvPMgr::AddZone(uint32 zoneid, OutdoorPvP *handle)
     m_OutdoorPvPMap[zoneid] = handle;
 }
 
+void OutdoorPvPMgr::NotifyMapAdded(Map* map)
+{
+    // World maps only - it's outdoor after all.
+    ASSERT(!map->Instanceable());
+
+    for (OutdoorPvPMap::iterator itr = m_OutdoorPvPMap.begin(); itr != m_OutdoorPvPMap.end(); ++itr)
+    {
+        if (itr->second->GetMap())                          // has already a map
+            continue;
+        uint32 zone_id = itr->first;
+        AreaTableEntry const* area = sAreaStore.LookupEntry(zone_id);
+        if (!area)
+            continue;
+
+        if (area->mapid != map->GetId())
+            continue;
+
+        // We are now sure this is a map we can use.
+        itr->second->SetMap(map);
+        break;
+    }
+}
+
+void OutdoorPvPMgr::NotifyMapDeleted(Map* map)
+{
+    // World maps only - it's outdoor after all.
+    ASSERT(!map->Instanceable());
+
+    for (OutdoorPvPMap::iterator itr = m_OutdoorPvPMap.begin(); itr != m_OutdoorPvPMap.end(); ++itr)
+    {
+        if (itr->second->GetMap() == map)
+        {
+            itr->second->SetMap(NULL);
+            break;
+        }
+    }
+}
 
 void OutdoorPvPMgr::HandlePlayerEnterZone(Player *plr, uint32 zoneid)
 {

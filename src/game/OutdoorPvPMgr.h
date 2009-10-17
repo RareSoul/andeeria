@@ -50,6 +50,11 @@ class OutdoorPvPMgr
 
         void AddZone(uint32 zoneid, OutdoorPvP * handle);
 
+        // called from destructor/constructor of map.. can set the mappointer to
+        // an outdoor-class
+        void NotifyMapAdded(Map* map);
+        void NotifyMapDeleted(Map* map);
+
         void Update(uint32 diff);
 
         bool HandleCaptureCreaturePlayerMoveInLos(Player * plr, Creature * c);
