@@ -26,7 +26,7 @@ npc_disciple_of_naralex
 EndContentData */
 
 #include "precompiled.h"
-#include "def_wailing_caverns.h"
+#include "wailing_caverns.h"
 #include "escort_ai.h"
 
 /*######
@@ -109,6 +109,7 @@ struct MANGOS_DLL_DECL npc_disciple_of_naralexAI : public npc_escortAI
         Potion_Timer = 5000;
         Cleansing_Timer = 0;
         Yelled = false;
+        SetRun(false);
     }
     
     void EnterEvadeMode() 
