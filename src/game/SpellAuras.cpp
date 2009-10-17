@@ -1653,8 +1653,13 @@ void Aura::TriggerSpell()
 //                    case 25041: break;
 //                    // Agro Drones
 //                    case 25152: break;
-//                    // Consume
-//                    case 25371: break;
+                    // Consume
+                    case 25371:
+                    {
+                        int32 bpDamage = target->GetMaxHealth()*10/100;
+                        caster->CastCustomSpell(target, 25373, &bpDamage, NULL, NULL, true, NULL, this);
+                        return;
+                    }
 //                    // Pain Spike
 //                    case 25572: break;
 //                    // Rotate 360
@@ -4711,6 +4716,9 @@ void Aura::HandlePeriodicEnergize(bool apply, bool Real)
 	case 57669: // Replenishment (0.25% from max)
 	case 61782: // Infinite Replenishment
 		m_modifier.m_amount = m_target->GetMaxPower(POWER_MANA) * 25 / 10000;
+		break;
+	case 48391: //Owlkin Frenzy
+        m_modifier.m_amount = m_target->GetCreateMana() * 2 / 100;
 		break;
 	case 29166: //Innervate
 		Player *caster = objmgr.GetPlayer(m_caster_guid);
