@@ -51,6 +51,9 @@
 #include "Language.h"
 #include "SocialMgr.h"
 #include "Util.h"
+#include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
+#include "CellImpl.h"
 #include "TemporarySummon.h"
 #include "ScriptCalls.h"
 #include "SkillDiscovery.h"
@@ -2311,6 +2314,10 @@ void Spell::EffectTriggerMissileSpell(uint32 effect_idx)
         DEBUG_LOG("WORLD: cast Item spellId - %i", spellInfo->Id);
 
     m_caster->CastSpell(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, spellInfo, true, m_CastItem, 0, m_originalCasterGUID);
+
+    if (triggered_spell_id == 47345 || triggered_spell_id == 47340)
+        if (unitTarget)
+            unitTarget->CastSpell(unitTarget,triggered_spell_id,true);
 }
 
 void Spell::EffectJump(uint32 i)
@@ -5392,6 +5399,39 @@ void Spell::EffectScriptEffect(uint32 effIndex)
                         ((Player*)m_caster)->learnSpell(discoveredSpell, false);
                     return;
                 }
+                // Request Second Mug 
+                // if Has Dark Brewmaiden's Brew (s47331) not dispeled by drinking Dark Brewmaiden's Brew (s47345) triggers
+                // Request Second Mug (s47344) which should force creature Ilsa Direbrew (c26764) to cast Send Second Mug (s47339)
+                case 47344:
+                {
+                    // Search Ilsa Direbrew
+                    uint32 IlsaEntry = 26764;
+                    float SpellRange = 100.0f;
+                    Creature* pCreature = NULL;
+
+                    CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
+                    Cell cell(p);
+                    cell.data.Part.reserved = ALL_DISTRICT;
+                    cell.SetNoCreate();
+
+                    MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck creature_check(*m_caster, IlsaEntry, true, SpellRange);
+                    MaNGOS::CreatureLastSearcher<MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck> searcher(m_caster, pCreature, creature_check);
+
+                    TypeContainerVisitor<MaNGOS::CreatureLastSearcher<MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck>, GridTypeMapContainer > grid_creature_searcher(searcher);
+
+                    CellLock<GridReadGuard> cell_lock(cell, p);
+                    cell_lock->Visit(cell_lock, grid_creature_searcher,*m_caster->GetMap(), *m_caster, SpellRange);
+
+                    // if found Ilsa alive cast Send Second Mug
+                    if (pCreature)
+                    {
+                        pCreature->InterruptNonMeleeSpells(false);
+                        pCreature->CastSpell(m_caster,47339,true);
+                    }
+                    //Dispel Triggering aura
+                    m_caster->RemoveAurasDueToSpell(47331);
+                    return;
+                }
                 // (Paladin spell with SPELLFAMILY_WARLOCK) - Guarded by The Light
                 case 63521:
                 {
@@ -6191,6 +6231,10 @@ void Spell::EffectInebriate(uint32 /*i*/)
     else
         currentDrunk += drunkMod;
     player->SetDrunkValue(currentDrunk, m_CastItem ? m_CastItem->GetEntry() : 0);
+
+    // if drunk Dark Brewmaiden's Brew remove aura Has Dark Brewmaiden's Brew 
+    if (m_spellInfo->Id == 47371)
+        m_caster->RemoveAurasDueToSpell(47331);
 }
 
 void Spell::EffectFeedPet(uint32 i)
