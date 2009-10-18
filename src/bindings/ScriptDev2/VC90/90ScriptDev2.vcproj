@@ -2484,7 +2484,7 @@
 					>
 				</File>
 				<File
-					RelativePath="..\scripts\world\small_pet_handler.cpp"
+					RelativePath="..\scripts\world\npc_small_pet_handler.cpp"
 					>
 				</File>
 			</Filter>
