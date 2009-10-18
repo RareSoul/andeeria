@@ -1465,6 +1465,9 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
             // Dragonmaw Illusion, Blood Elf Illusion, Human Illusion, Illidari Agent Illusion, Scarlet Crusade Disguise
             if(spellInfo_1->SpellIconID == 1691 && spellInfo_2->SpellIconID == 1691)
                 return false;
+            // BloodBoil and other spells with the same icon like BloodPact
+            if (spellInfo_1->Id == 42005 && spellInfo_2->SpellIconID == 541)
+                return false;
             break;
         case SPELLFAMILY_MAGE:
             if( spellInfo_2->SpellFamilyName == SPELLFAMILY_MAGE )
@@ -1555,6 +1558,9 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
             }
             // Detect Invisibility and Mana Shield (multi-family check)
             if( spellInfo_1->Id == 132 && spellInfo_2->SpellIconID == 209 && spellInfo_2->SpellVisual[0] == 968 )
+                return false;
+            // BloodPact & Bloodboil
+            if (spellInfo_1->SpellIconID == 541 && spellInfo_2->Id == 42005)
                 return false;
 
             // Fire Shield and Fire Ward (multi-family check)
