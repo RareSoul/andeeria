@@ -91,7 +91,8 @@ void OutdoorPvPMgr::AddZone(uint32 zoneid, OutdoorPvP *handle)
 void OutdoorPvPMgr::NotifyMapAdded(Map* map)
 {
     // World maps only - it's outdoor after all.
-    ASSERT(!map->Instanceable());
+    if (map->Instanceable())
+        return;
 
     for (OutdoorPvPMap::iterator itr = m_OutdoorPvPMap.begin(); itr != m_OutdoorPvPMap.end(); ++itr)
     {
@@ -114,7 +115,8 @@ void OutdoorPvPMgr::NotifyMapAdded(Map* map)
 void OutdoorPvPMgr::NotifyMapDeleted(Map* map)
 {
     // World maps only - it's outdoor after all.
-    ASSERT(!map->Instanceable());
+    if (map->Instanceable())
+        return;
 
     for (OutdoorPvPMap::iterator itr = m_OutdoorPvPMap.begin(); itr != m_OutdoorPvPMap.end(); ++itr)
     {
