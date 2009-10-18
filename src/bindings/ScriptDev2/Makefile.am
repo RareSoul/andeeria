@@ -83,6 +83,7 @@ scripts/eastern_kingdoms/blackrock_depths/boss_grizzle.cpp \
 scripts/eastern_kingdoms/blackrock_depths/boss_high_interrogator_gerstahn.cpp \
 scripts/eastern_kingdoms/blackrock_depths/boss_magmus.cpp \
 scripts/eastern_kingdoms/blackrock_depths/boss_tomb_of_seven.cpp \
+scripts/eastern_kingdoms/blackrock_depths/boss_coren_direbrew.cpp \
 scripts/eastern_kingdoms/blackrock_depths/instance_blackrock_depths.cpp \
 scripts/eastern_kingdoms/blackrock_spire/boss_drakkisath.cpp \
 scripts/eastern_kingdoms/blackrock_spire/boss_gyth.cpp \
@@ -188,6 +189,7 @@ scripts/eastern_kingdoms/stratholme/stratholme.cpp \
 scripts/eastern_kingdoms/stratholme/stratholme.h \
 scripts/eastern_kingdoms/sunwell_plateau/boss_brutallus.cpp \
 scripts/eastern_kingdoms/sunwell_plateau/boss_kalecgos.cpp \
+scripts/eastern_kingdoms/sunwell_plateau/boss_eredar_twins.cpp \
 scripts/eastern_kingdoms/sunwell_plateau/instance_sunwell_plateau.cpp \
 scripts/eastern_kingdoms/sunwell_plateau/sunwell_plateau.h \
 scripts/eastern_kingdoms/uldaman/boss_ironaya.cpp \
@@ -251,6 +253,9 @@ scripts/kalimdor/caverns_of_time/dark_portal/dark_portal.cpp \
 scripts/kalimdor/caverns_of_time/dark_portal/dark_portal.h \
 scripts/kalimdor/caverns_of_time/dark_portal/instance_dark_portal.cpp \
 scripts/kalimdor/caverns_of_time/hyjal/boss_archimonde.cpp \
+scripts/kalimdor/caverns_of_time/hyjal/boss_azgalor.cpp \
+scripts/kalimdor/caverns_of_time/hyjal/boss_anetheron.cpp \
+scripts/kalimdor/caverns_of_time/hyjal/boss_kazrogal.cpp \
 scripts/kalimdor/caverns_of_time/hyjal/hyjal.cpp \
 scripts/kalimdor/caverns_of_time/hyjal/hyjal.h \
 scripts/kalimdor/caverns_of_time/hyjal/hyjalAI.cpp \
@@ -288,6 +293,9 @@ scripts/kalimdor/temple_of_ahnqiraj/boss_viscidus.cpp \
 scripts/kalimdor/temple_of_ahnqiraj/instance_temple_of_ahnqiraj.cpp \
 scripts/kalimdor/temple_of_ahnqiraj/mob_anubisath_sentinel.cpp \
 scripts/kalimdor/temple_of_ahnqiraj/temple_of_ahnqiraj.h \
+scripts/kalimdor/wailing_caverns/wailing_caverns.cpp \
+scripts/kalimdor/wailing_caverns/instance_wailing_caverns.cpp \
+scripts/kalimdor/wailing_caverns/wailing_caverns.h \
 scripts/kalimdor/zulfarrak/zulfarrak.cpp \
 scripts/northrend/borean_tundra.cpp \
 scripts/northrend/dalaran.cpp \
@@ -415,7 +423,9 @@ scripts/outland/coilfang_reservoir/steam_vault/boss_mekgineer_steamrigger.cpp \
 scripts/outland/coilfang_reservoir/steam_vault/boss_warlord_kalithresh.cpp \
 scripts/outland/coilfang_reservoir/steam_vault/instance_steam_vault.cpp \
 scripts/outland/coilfang_reservoir/steam_vault/steam_vault.h \
+scripts/outland/coilfang_reservoir/underbog/boss_black_stalker.cpp \
 scripts/outland/coilfang_reservoir/underbog/boss_hungarfen.cpp \
+scripts/outland/coilfang_reservoir/underbog/instance_underbog.cpp \
 scripts/outland/gruuls_lair/boss_gruul.cpp \
 scripts/outland/gruuls_lair/boss_high_king_maulgar.cpp \
 scripts/outland/gruuls_lair/gruuls_lair.h \
@@ -448,6 +458,7 @@ scripts/outland/tempest_keep/botanica/boss_warp_splinter.cpp \
 scripts/outland/tempest_keep/the_eye/boss_astromancer.cpp \
 scripts/outland/tempest_keep/the_eye/boss_kaelthas.cpp \
 scripts/outland/tempest_keep/the_eye/boss_void_reaver.cpp \
+scripts/outland/tempest_keep/the_eye/boss_alar.cpp \
 scripts/outland/tempest_keep/the_eye/instance_the_eye.cpp \
 scripts/outland/tempest_keep/the_eye/the_eye.cpp \
 scripts/outland/tempest_keep/the_eye/the_eye.h \
@@ -468,6 +479,7 @@ scripts/world/item_scripts.cpp \
 scripts/world/mob_generic_creature.cpp \
 scripts/world/npc_innkeeper.cpp \
 scripts/world/npc_professions.cpp \
+scripts/world/npc_small_pet_handler.cpp \
 scripts/world/npcs_special.cpp \
 system/ScriptLoader.cpp \
 system/ScriptLoader.h \

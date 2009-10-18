@@ -22,7 +22,7 @@ SDCategory: Wailing Caverns
 EndScriptData */
 
 #include "precompiled.h"
-#include "def_wailing_caverns.h"
+#include "wailing_caverns.h"
 
 struct MANGOS_DLL_DECL instance_wailing_caverns : public ScriptedInstance
 {

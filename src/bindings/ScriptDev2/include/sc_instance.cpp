@@ -66,8 +66,9 @@ void ScriptedInstance::DestroyItemFromAllPlayers(uint32 uiItemId)
     {
         for(Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
         {
-			if (Player* pPlayer = itr->getSource())
-				pPlayer->DestroyItemCount(uiItemId,pPlayer->GetItemCount(uiItemId),true,true);
+            if (Player* pPlayer = itr->getSource())
+                if (pPlayer->GetItemCount(uiItemId,true) > 0)
+                    pPlayer->DestroyItemCount(uiItemId,pPlayer->GetItemCount(uiItemId),true);
         }
 	}
 	else
