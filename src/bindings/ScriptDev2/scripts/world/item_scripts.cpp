@@ -149,6 +149,19 @@ bool ItemUse_item_gor_dreks_ointment(Player* pPlayer, Item* pItem, const SpellCa
 
     return false;
 }
+/*#####
+# item_fishing_chair
+#####*/
+
+bool ItemUse_item_fishing_chair(Player* pPlayer, Item* _Item, SpellCastTargets const& targets)
+{
+	if ((pPlayer->GetMapId() == 530) || (pPlayer->GetMapId() == 0) || (pPlayer->GetMapId() == 1))
+		return false;
+	else
+    pPlayer->SendEquipError(EQUIP_ERR_CANT_DO_RIGHT_NOW,_Item,NULL);
+    return true;
+}
+
 
 void AddSC_item_scripts()
 {
@@ -177,5 +190,10 @@ void AddSC_item_scripts()
     newscript = new Script;
     newscript->Name = "item_gor_dreks_ointment";
     newscript->pItemUse = &ItemUse_item_gor_dreks_ointment;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "item_fishing_chair";
+    newscript->pItemUse = &ItemUse_item_fishing_chair;
     newscript->RegisterSelf();
 }
