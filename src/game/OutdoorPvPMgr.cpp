@@ -38,9 +38,7 @@ OutdoorPvPMgr::~OutdoorPvPMgr()
 {
     sLog.outDebug("OutdoorPvPMgr: Deleting");
     for(OutdoorPvPSet::iterator itr = m_OutdoorPvPSet.begin(); itr != m_OutdoorPvPSet.end(); ++itr)
-    {
         (*itr)->DeleteSpawns();
-    }
 }
 
 void OutdoorPvPMgr::CreateOutdoorPvP(uint32 typeId)
