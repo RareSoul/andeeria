@@ -232,6 +232,7 @@ void Log::Initialize()
     // Main log file settings
     m_includeTime  = sConfig.GetBoolDefault("LogTime", false);
     m_logLevel     = sConfig.GetIntDefault("LogLevel", 0);
+	m_logOpcode	   = sConfig.GetIntDefault("LogOpcode", 0);
     m_logFileLevel = sConfig.GetIntDefault("LogFileLevel", 0);
     InitColors(sConfig.GetStringDefault("LogColors", ""));
 

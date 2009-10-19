@@ -119,6 +119,7 @@ class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, ACE_Th
         bool IsOutDebug() const { return m_logLevel > 2 || (m_logFileLevel > 2 && logfile); }
         bool IsOutCharDump() const { return m_charLog_Dump; }
         bool IsIncludeTime() const { return m_includeTime; }
+		bool IsLogOpcode() const { return (m_logOpcode == 0 ? true : false); }
     private:
         FILE* openLogFile(char const* configFileName,char const* configTimeStampFlag, char const* mode);
         FILE* openGmlogPerAccount(uint32 account);
@@ -130,6 +131,7 @@ class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, ACE_Th
         FILE* dberLogfile;
 
         // log/console control
+		uint32 m_logOpcode;
         uint32 m_logLevel;
         uint32 m_logFileLevel;
         bool m_colored;
