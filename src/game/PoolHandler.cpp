@@ -73,12 +73,12 @@ bool PoolGroup<T>::IsSpawnedObject(uint32 guid)
     return false;
 }
 
-// Method that return a guid of a rolled creature or gameobject
-// Note: Copy from loot system because it's very similar and only few things change
+// Method that return a index of a rolled creature or gameobject
+// from explicitly chanced list
 template <class T>
-uint32 PoolGroup<T>::RollOne(void)
+int32 PoolGroup<T>::RollOneExplicitlyChanced(void)
 {
-    if (!ExplicitlyChanced.empty())                         // First explicitly chanced entries are checked
+    if (!ExplicitlyChanced.empty())
     {
         float roll = rand_chance();
 
@@ -86,39 +86,55 @@ uint32 PoolGroup<T>::RollOne(void)
         {
             roll -= ExplicitlyChanced[i].chance;
             if (roll < 0)
-                return ExplicitlyChanced[i].guid;
+                return i;
         }
     }
-    if (!EqualChanced.empty())
-        return EqualChanced[irand(0, EqualChanced.size()-1)].guid;
 
-    return 0;                                               // None found
+    return -1;                                               // None found
+}
+
+// Method that return a index of a rolled creature or gameobject
+// from equal chanced lis
+template <class T>
+int32 PoolGroup<T>::RollOneEqualChanced(void)
+{
+    if (!EqualChanced.empty())
+        return irand(0, EqualChanced.size()-1);
+
+    return -1;                                               // None found
 }
 
 // Main method to despawn a creature or gameobject in a pool
 // If no guid is passed, the pool is just removed (event end case)
 // If guid is filled, cache will be used and no removal will occur, it just fill the cache
 template<class T>
-void PoolGroup<T>::DespawnObject(uint32 guid)
+void PoolGroup<T>::DespawnObject(uint32 guid, PoolObjectList poolObjectList)
 {
-    for (size_t i=0; i < EqualChanced.size(); ++i)
+    for (size_t i=0; i < poolObjectList.size(); ++i)
     {
-        if (EqualChanced[i].spawned)
+        if (poolObjectList[i].spawned)
         {
-            if (!guid || EqualChanced[i].guid == guid)
+            if (!guid || poolObjectList[i].guid == guid)
             {
                 if (guid)
-                    m_LastDespawnedNode = EqualChanced[i].guid;
+                    m_LastDespawnedNode = poolObjectList[i].guid;
                 else
-                    Despawn1Object(EqualChanced[i].guid);
+                    Despawn1Object(poolObjectList[i].guid);
 
-                EqualChanced[i].spawned = false;
+                poolObjectList[i].spawned = false;
 
                 if (m_SpawnedPoolAmount > 0)
                     --m_SpawnedPoolAmount;
             }
         }
     }
+}
+
+template<class T>
+void PoolGroup<T>::DespawnObject(uint32 guid)
+{
+    DespawnObject(guid, ExplicitlyChanced);
+    DespawnObject(guid, EqualChanced);
 }
 
 // Method that is actualy doing the removal job on one creature
@@ -184,15 +200,38 @@ void PoolGroup<T>::SpawnObject(uint32 limit, bool cache)
 {
     if (limit == 1)                                         // This is the only case where explicit chance is used
     {
-        uint32 roll = RollOne();
+        bool explicitlyChanced;
+        bool spawnSuccess;
+        int32 idx = RollOneExplicitlyChanced();
+        uint32 roll = 0;
+        if (idx != -1)
+        {
+            roll = ExplicitlyChanced[idx].guid;
+            explicitlyChanced = true;
+        }
+        else
+        {
+            idx = RollOneEqualChanced();
+            if (idx == -1) // Nothing to spawn in both lists
+                return;
+            roll = EqualChanced[idx].guid;
+            explicitlyChanced = false;
+        }
         if (!cache || (cache && m_LastDespawnedNode != roll))
         {
             if (cache)
                 Despawn1Object(m_LastDespawnedNode);
-            Spawn1Object(roll);
+            spawnSuccess = Spawn1Object(roll);
         }
         else
-            ReSpawn1Object(roll);
+            spawnSuccess = ReSpawn1Object(roll);
+        if (explicitlyChanced)
+            ExplicitlyChanced[idx].spawned = spawnSuccess;
+        else
+            EqualChanced[idx].spawned = spawnSuccess;
+        if (spawnSuccess)
+             ++m_SpawnedPoolAmount;
+
         m_LastDespawnedNode = 0;
     }
     else if (limit < EqualChanced.size() && m_SpawnedPoolAmount < limit)
@@ -243,7 +282,7 @@ bool PoolGroup<Creature>::Spawn1Object(uint32 guid)
         // Spawn if necessary (loaded grids only)
         Map* map = const_cast<Map*>(MapManager::Instance().CreateBaseMap(data->mapid));
         // We use spawn coords to spawn
-        if (!map->Instanceable() && !map->IsRemovalGrid(data->posX, data->posY))
+        if (!map->Instanceable() && map->IsLoaded(data->posX, data->posY))
         {
             Creature* pCreature = new Creature;
             //sLog.outDebug("Spawning creature %u",guid);
@@ -273,7 +312,7 @@ bool PoolGroup<GameObject>::Spawn1Object(uint32 guid)
         // this base map checked as non-instanced and then only existed
         Map* map = const_cast<Map*>(MapManager::Instance().CreateBaseMap(data->mapid));
         // We use current coords to unspawn, not spawn coords since creature can have changed grid
-        if (!map->Instanceable() && !map->IsRemovalGrid(data->posX, data->posY))
+        if (!map->Instanceable() && map->IsLoaded(data->posX, data->posY))
         {
             GameObject* pGameobject = new GameObject;
             //sLog.outDebug("Spawning gameobject %u", guid);

@@ -297,8 +297,6 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 
             sChatLog.GuildMsg(GetPlayer(), msg, false);
 
-            sChatLog.GuildMsg(GetPlayer(), msg, true);
-
             if (GetPlayer()->GetGuildId())
             {
                 Guild *guild = objmgr.GetGuildById(GetPlayer()->GetGuildId());
@@ -324,6 +322,8 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 
             if(msg.empty())
                 break;
+
+            sChatLog.GuildMsg(GetPlayer(), msg, true); 
 
             if (GetPlayer()->GetGuildId())
             {

@@ -2248,6 +2248,8 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
         // Reduce dodge chance by attacker expertise rating
         if (GetTypeId() == TYPEID_PLAYER)
             dodge_chance -= int32(((Player*)this)->GetExpertiseDodgeOrParryReduction(attType)*100);
+        else
+            dodge_chance -= GetTotalAuraModifier(SPELL_AURA_MOD_EXPERTISE)*25;
 
         // Modify dodge chance by attacker SPELL_AURA_MOD_COMBAT_RESULT_CHANCE
         dodge_chance+= GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_COMBAT_RESULT_CHANCE, VICTIMSTATE_DODGE)*100;
@@ -2274,6 +2276,8 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
         // Reduce parry chance by attacker expertise rating
         if (GetTypeId() == TYPEID_PLAYER)
             parry_chance-= int32(((Player*)this)->GetExpertiseDodgeOrParryReduction(attType)*100);
+        else
+            parry_chance -= GetTotalAuraModifier(SPELL_AURA_MOD_EXPERTISE)*25;
 
         if(pVictim->GetTypeId()==TYPEID_PLAYER || !(((Creature*)pVictim)->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_NO_PARRY) )
         {
@@ -2628,6 +2632,8 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit *pVictim, SpellEntry const *spell, 
         // Reduce dodge chance by attacker expertise rating
         if (GetTypeId() == TYPEID_PLAYER)
             dodgeChance-=int32(((Player*)this)->GetExpertiseDodgeOrParryReduction(attType) * 100.0f);
+        else
+            dodgeChance -= GetTotalAuraModifier(SPELL_AURA_MOD_EXPERTISE)*25;
         if (dodgeChance < 0)
             dodgeChance = 0;
 
@@ -2643,6 +2649,8 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit *pVictim, SpellEntry const *spell, 
         // Reduce parry chance by attacker expertise rating
         if (GetTypeId() == TYPEID_PLAYER)
             parryChance-=int32(((Player*)this)->GetExpertiseDodgeOrParryReduction(attType) * 100.0f);
+        else
+            parryChance -= GetTotalAuraModifier(SPELL_AURA_MOD_EXPERTISE)*25;
         if (parryChance < 0)
             parryChance = 0;
 
@@ -5159,15 +5167,6 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
                     }
                     return true;
                 }
-                // Shattered Barrier
-                case 44745:
-                case 54787:
-                {
-                    if(procSpell->SpellIconID != 32)
-                        return false;
-                    CastSpell(this, 55080, true);
-                    return true;
-                }
             }
             break;
         }
@@ -5303,6 +5302,15 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
 
                     CastSpell(this, 28682, true, castItem, triggeredByAura);
                     return (procEx & PROC_EX_CRITICAL_HIT); // charge update only at crit hits, no hidden cooldowns
+                }
+                // Shattered Barrier
+                case 44745:
+                case 54787:
+                {
+                    if(procSpell->SpellIconID != 32)
+                        return false;
+                    CastSpell(this, 55080, true);
+                    return true;
                 }
                 // Glyph of Ice Block
                 case 56372:
@@ -5465,55 +5473,6 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
                 triggered_spell_id = 54181;
                 break;
             }
-            // Rapture (Ranks 1-3)
-            if (dummySpell->SpellIconID == 2894)
-            {
-                switch(effIndex)
-                {
-                    case 0:
-                    {
-                        // energize caster
-                        int32 manapct1000 = 5 * (triggerAmount + spellmgr.GetSpellRank(dummySpell->Id));
-                        int32 basepoints0 = this->GetMaxPower(POWER_MANA) * manapct1000 / 1000;
-                        CastCustomSpell(this, 47755, &basepoints0, NULL, NULL, true);
-                        break;
-                    }
-                    case 1:
-                    {
-                        // energize target
-                       if (!roll_chance_i(triggerAmount) || this->HasAura(63853))
-                           break;
-
-                       switch(pVictim->getPowerType())
-                       {
-                            case POWER_RUNIC_POWER:
-                                pVictim->CastSpell(pVictim, 63652, true, NULL, triggeredByAura);
-                                break;
-                            case POWER_RAGE:
-                                pVictim->CastSpell(pVictim, 63653, true, NULL, triggeredByAura);
-                                break;
-                            case POWER_MANA:
-                            {
-                                int32 basepoints0 = pVictim->GetMaxPower(POWER_MANA) * 2 / 100;
-                                pVictim->CastCustomSpell(pVictim, 63654, &basepoints0, NULL, NULL, true, NULL, triggeredByAura);
-                                break;
-                            }
-                            case POWER_ENERGY:
-                                pVictim->CastSpell(pVictim, 63655, true, NULL, triggeredByAura);
-                                break;
-                            default:
-                                break;
-                       }
-                       //cooldown aura
-                       this->CastSpell(this, 63853, true);
-                       break;
-                    }
-                    default:
-                        sLog.outError("Changes in R-dummy spell???: effect 3");
-                        break;
-                }
-                return true;
-            }
             switch(dummySpell->Id)
             {
                 // Nightfall & Glyph of Corruption
@@ -5612,6 +5571,55 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
                 RemoveSpellsCausingAura(SPELL_AURA_MOD_ROOT);
                 RemoveSpellsCausingAura(SPELL_AURA_MOD_DECREASE_SPEED);
                 break;
+            }
+            // Rapture (Ranks 1-3)
+            else if (dummySpell->SpellIconID == 2894)
+            {
+                switch(effIndex)
+                {
+                    case 0:
+                    {
+                        // energize caster
+                        int32 manapct1000 = 5 * (triggerAmount + spellmgr.GetSpellRank(dummySpell->Id));
+                        int32 basepoints0 = this->GetMaxPower(POWER_MANA) * manapct1000 / 1000;
+                        CastCustomSpell(this, 47755, &basepoints0, NULL, NULL, true);
+                        break;
+                    }
+                    case 1:
+                    {
+                        // energize target
+                       if (!roll_chance_i(triggerAmount) || this->HasAura(63853))
+                           break;
+
+                       switch(pVictim->getPowerType())
+                       {
+                            case POWER_RUNIC_POWER:
+                                pVictim->CastSpell(pVictim, 63652, true, NULL, triggeredByAura);
+                                break;
+                            case POWER_RAGE:
+                                pVictim->CastSpell(pVictim, 63653, true, NULL, triggeredByAura);
+                                break;
+                            case POWER_MANA:
+                            {
+                                int32 basepoints0 = pVictim->GetMaxPower(POWER_MANA) * 2 / 100;
+                                pVictim->CastCustomSpell(pVictim, 63654, &basepoints0, NULL, NULL, true, NULL, triggeredByAura);
+                                break;
+                            }
+                            case POWER_ENERGY:
+                                pVictim->CastSpell(pVictim, 63655, true, NULL, triggeredByAura);
+                                break;
+                            default:
+                                break;
+                       }
+                       //cooldown aura
+                       this->CastSpell(this, 63853, true);
+                       break;
+                    }
+                    default:
+                        sLog.outError("Changes in R-dummy spell???: effect 3");
+                        break;
+                }
+                return true;
             }
 
             switch(dummySpell->Id)
@@ -10240,7 +10248,8 @@ bool Unit::isTargetableForAttack(bool inverseAlive /*=false*/) const
     if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE))
         return false;
 
-    if (!(isAlive() != inverseAlive))
+    // target is dead or has ghost-flag
+    if ((!isAlive() || (GetTypeId() == TYPEID_UNIT && ((Creature *)this)->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_GHOST)) != inverseAlive)
         return false;
 
     return IsInWorld() && !hasUnitState(UNIT_STAT_DIED)&& !isInFlight() /*&& !isStealth()*/;

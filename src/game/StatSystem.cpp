@@ -857,8 +857,8 @@ void Creature::UpdateDamagePhysical(WeaponAttackType attType)
     int32 ModSpeed = GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKSPEED);
     base_pct = base_pct * 100.0f/(100.0f+float(ModSpeed));
 
-    float mindamage = ((base_value + weapon_mindamage) * base_pct + total_value) * total_pct * dmg_multiplier;
-    float maxdamage = ((base_value + weapon_maxdamage) * base_pct + total_value) * total_pct * dmg_multiplier;
+    float mindamage = ((base_value + weapon_mindamage) * dmg_multiplier * base_pct + total_value) * total_pct;
+    float maxdamage = ((base_value + weapon_maxdamage) * dmg_multiplier * base_pct + total_value) * total_pct;
 
     SetStatFloatValue(UNIT_FIELD_MINDAMAGE, mindamage);
     SetStatFloatValue(UNIT_FIELD_MAXDAMAGE, maxdamage);

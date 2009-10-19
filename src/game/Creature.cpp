@@ -342,15 +342,6 @@ void Creature::Update(uint32 diff)
             break;
         case DEAD:
         {
-            if (isSpiritService())
-            {
-                Unit::Update( diff );
-                // do not allow the AI to be changed during update
-                m_AI_locked = true;
-                i_AI->UpdateAI(diff);
-                m_AI_locked = false;
-                break;                                      // they don't should respawn
-            }
             if( m_respawnTime <= time(NULL) )
             {
                 DEBUG_LOG("Respawning...");
@@ -1605,10 +1596,7 @@ void Creature::setDeathState(DeathState s)
         RemoveFlag (UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
         AddMonsterMoveFlag(MONSTER_MOVE_WALK);
         SetUInt32Value(UNIT_NPC_FLAGS, cinfo->npcflag);
-        if (!isSpiritService())
-            Unit::setDeathState(ALIVE);
-        else
-            Unit::setDeathState(DEAD);
+        Unit::setDeathState(ALIVE);
         clearUnitState(UNIT_STAT_ALL_STATE);
         i_motionMaster.Clear();
         SetMeleeDamageSchool(SpellSchools(cinfo->dmgschool));
@@ -1803,7 +1791,7 @@ bool Creature::IsVisibleInGridForPlayer(Player* pl) const
     // Live player (or with not release body see live creatures or death creatures with corpse disappearing time > 0
     if(pl->isAlive() || pl->GetDeathTimer() > 0)
     {
-        if(GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_INVISIBLE)
+        if(GetCreatureInfo()->flags_extra & (CREATURE_FLAG_EXTRA_INVISIBLE | CREATURE_FLAG_EXTRA_GHOST))
             return false;
         return (isAlive() || m_deathTimer > 0 || (m_isDeadByDefault && m_deathState == CORPSE));
     }
@@ -1820,8 +1808,8 @@ bool Creature::IsVisibleInGridForPlayer(Player* pl) const
         }
     }
 
-    // Dead player see Spirit Healer or Spirit Guide
-    if(isSpiritService())
+    // Dead player see ghosts
+    if (GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_GHOST)
         return true;
 
     // and not see any other

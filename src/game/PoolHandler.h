@@ -46,7 +46,6 @@ class PoolGroup
         bool isEmpty() { return ExplicitlyChanced.empty() && EqualChanced.empty(); }
         void AddEntry(PoolObject& poolitem, uint32 maxentries);
         bool CheckPool(void);
-        uint32 RollOne(void);
         bool IsSpawnedObject(uint32 guid);
         void DespawnObject(uint32 guid=0);
         void Despawn1Object(uint32 guid);
@@ -60,6 +59,9 @@ class PoolGroup
         PoolObjectList EqualChanced;
         uint32 m_LastDespawnedNode;                         // Store the guid of the removed creature/gameobject during a pool update
         uint32 m_SpawnedPoolAmount;                         // Used to know the number of spawned objects
+        int32 RollOneExplicitlyChanced(void);
+        int32 RollOneEqualChanced(void);
+        void DespawnObject(uint32 guid, PoolObjectList poolObjectList);
 };
 
 class Pool                                                  // for Pool of Pool case

@@ -204,8 +204,7 @@ inline bool IsPassiveSpellStackableWithRanks(SpellEntry const* spellProto)
 inline bool IsDeathOnlySpell(SpellEntry const *spellInfo)
 {
     return spellInfo->AttributesEx3 & SPELL_ATTR_EX3_CAST_ON_DEAD
-        || spellInfo->Id == 2584
-        || spellInfo->Id == 22011;
+        || spellInfo->Id == 2584;
 }
 
 inline bool IsDeathPersistentSpell(SpellEntry const *spellInfo)
@@ -480,7 +479,7 @@ enum ProcFlags
    PROC_FLAG_TAKEN_OFFHAND_HIT             = 0x00400000,    // 22 Taken off-hand melee attacks(not used)
    PROC_FLAG_SUCCESSFUL_OFFHAND_HIT        = 0x00800000,    // 23 Successful off-hand melee attacks
 
-   PROC_FLAG_ON_DEATH                      = 0x01000000,     // 24 On caster's death
+   PROC_FLAG_ON_DEATH                      = 0x01000000,    // 24 On caster's death
    PROC_FLAG_ON_AURA_REMOVE                = 0x02000000     // 25 On Aura remove
 };
 
