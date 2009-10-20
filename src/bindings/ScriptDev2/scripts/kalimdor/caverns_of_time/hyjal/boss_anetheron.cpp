@@ -22,7 +22,7 @@ SDCategory: Caverns of Time, Mount Hyjal
 EndScriptData */
 
 #include "precompiled.h"
-#include "def_hyjal.h"
+#include "hyjal.h"
 
 enum
 {
@@ -158,7 +158,7 @@ struct MANGOS_DLL_DECL boss_anetheronAI : public ScriptedAI
 
 	void UpdateAI(const uint32 diff)
 	{
-		if (!m_creature->SelectHostilTarget() || !m_creature->getVictim() )
+		if (!m_creature->SelectHostileTarget() || !m_creature->getVictim() )
 			return;
 
 		if(CarrionSwarmTimer < diff)
@@ -253,7 +253,7 @@ struct MANGOS_DLL_DECL mob_towering_infernalAI : public ScriptedAI
 
     void UpdateAI(const uint32 diff)
     {
-        if (!m_creature->SelectHostilTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
 		if(!Immolation)
