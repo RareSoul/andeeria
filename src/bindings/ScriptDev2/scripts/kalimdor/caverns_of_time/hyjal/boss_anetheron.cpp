@@ -22,7 +22,7 @@ SDCategory: Caverns of Time, Mount Hyjal
 EndScriptData */
 
 #include "precompiled.h"
-#include "hyjal.h"
+#include "def_hyjal.h"
 
 enum
 {
@@ -140,20 +140,25 @@ struct MANGOS_DLL_DECL boss_anetheronAI : public ScriptedAI
 			{
                 if(Unit* target = SelectUnit(SELECT_TARGET_RANDOM, 0))
 				{
-					for(uint32 i=0 ;i<3; ++i)
-					{
-						uint8 eff = spellInfo->Effect[i];
-						if (eff>=TOTAL_SPELL_EFFECTS)
-							continue;
-						target->AddAura(new AnetheronSleep(spellInfo, i, NULL, target, target));
-					}
+                    if (target && target->GetTypeId() == TYPEID_PLAYER)
+                    {
+					    for(uint32 i=0 ;i<3; ++i)
+					    {
+						    uint8 eff = spellInfo->Effect[i];
+						    if (eff>=TOTAL_SPELL_EFFECTS)
+							    continue;
+						    target->AddAura(new AnetheronSleep(spellInfo, i, NULL, target, target));
+					    }
+                    }
+                    else
+                        --j;
 				}
 			}
     }
 
 	void UpdateAI(const uint32 diff)
 	{
-		if (!m_creature->SelectHostileTarget() || !m_creature->getVictim() )
+		if (!m_creature->SelectHostilTarget() || !m_creature->getVictim() )
 			return;
 
 		if(CarrionSwarmTimer < diff)
@@ -248,7 +253,7 @@ struct MANGOS_DLL_DECL mob_towering_infernalAI : public ScriptedAI
 
     void UpdateAI(const uint32 diff)
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostilTarget() || !m_creature->getVictim())
             return;
 
 		if(!Immolation)
