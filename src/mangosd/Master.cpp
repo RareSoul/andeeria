@@ -478,8 +478,7 @@ void Master::clearOnlineAccounts()
     // Cleanup online status for characters hosted at current realm
     /// \todo Only accounts with characters logged on *this* realm should have online status reset. Move the online column from 'account' to 'realmcharacters'?
     loginDatabase.PExecute(
-        "UPDATE account SET online = 0, ActiveRealmID = 0 WHERE online > 0  AND ActiveRealmID = '%d'"
-        "AND id IN (SELECT acctid FROM realmcharacters WHERE realmid = '%d')", realmID, realmID);
+        "UPDATE account SET online = 0, ActiveRealmID = 0 WHERE online > 0  AND ActiveRealmID = '%d'" realmID);
 
     CharacterDatabase.Execute("UPDATE characters SET online = 0 WHERE online<>0");
 
