@@ -119,15 +119,22 @@ struct MANGOS_DLL_DECL boss_azgalorAI : public ScriptedAI
         SpellEntry *spellInfo = (SpellEntry *)GetSpellStore()->LookupEntry(SPELL_DOOM);
         if (spellInfo)
             //target without tank
-            if(Unit* target = SelectUnit(SELECT_TARGET_RANDOM, 1))
-                for(uint32 i=0 ;i<3; ++i)
+            if (Unit* target = SelectUnit(SELECT_TARGET_RANDOM, 1))
+            {
+                if (target && target->GetTypeId() == TYPEID_PLAYER)
                 {
-                    uint8 eff = spellInfo->Effect[i];
-                    if (eff>=TOTAL_SPELL_EFFECTS)
-                        continue;
-                    //uint8 i=1;
-                    target->AddAura(new AzgalorDoom(spellInfo, i, NULL, target, target));
+                    for(uint32 i=0 ;i<3; ++i)
+                    {
+                        uint8 eff = spellInfo->Effect[i];
+                        if (eff>=TOTAL_SPELL_EFFECTS)
+                            continue;
+                        //uint8 i=1;
+                        target->AddAura(new AzgalorDoom(spellInfo, i, NULL, target, target));
+                    }
                 }
+                else
+                    DoomTimer = 1000;
+            }
     }
 
     void UpdateAI(const uint32 diff)

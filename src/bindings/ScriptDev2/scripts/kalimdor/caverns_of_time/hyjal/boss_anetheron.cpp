@@ -140,13 +140,18 @@ struct MANGOS_DLL_DECL boss_anetheronAI : public ScriptedAI
 			{
                 if(Unit* target = SelectUnit(SELECT_TARGET_RANDOM, 0))
 				{
-					for(uint32 i=0 ;i<3; ++i)
-					{
-						uint8 eff = spellInfo->Effect[i];
-						if (eff>=TOTAL_SPELL_EFFECTS)
-							continue;
-						target->AddAura(new AnetheronSleep(spellInfo, i, NULL, target, target));
-					}
+                    if (target && target->GetTypeId() == TYPEID_PLAYER)
+                    {
+					    for(uint32 i=0 ;i<3; ++i)
+					    {
+						    uint8 eff = spellInfo->Effect[i];
+						    if (eff>=TOTAL_SPELL_EFFECTS)
+							    continue;
+						    target->AddAura(new AnetheronSleep(spellInfo, i, NULL, target, target));
+					    }
+                    }
+                    else
+                        --j;
 				}
 			}
     }

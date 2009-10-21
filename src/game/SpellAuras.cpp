@@ -2330,6 +2330,15 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             case 43873:                                     // Headless Horseman Laugh
                 m_target->PlayDistanceSound(11965);
                 return;
+            case 43881:
+                caster->PlayDirectSound(11975);             // Headless Horseman Laugh
+                return;
+            case 43894:
+                caster->PlayDirectSound(11976);             // Headless Horseman - Horseman Laugh, Low Key
+                return;
+            case 43885:
+                caster->PlayDirectSound(12119);             // Headless Horseman - Horseman Laugh, Maniacal
+                return;
             case 46354:                                     // Blood Elf Illusion
                 if(caster)
                 {
