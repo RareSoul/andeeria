@@ -2216,7 +2216,7 @@ void Aura::TriggerSpell()
             {
                 if (!target->isAlive())
                 {
-                    caster->RemoveAurasDueToSpell(auraId);
+                    target->RemoveAurasDueToSpell(auraId);
                     return;
                 }
                 break;
