@@ -1,5 +1,6 @@
-UPDATE `creature_template` SET `ScriptName`='mob_loatheb_spores' WHERE `entry`=16286;
-UPDATE `creature_template` SET `ScriptName`='boss_gothik' WHERE `entry`=16060;
-UPDATE `creature_template` SET `ScriptName`='mob_gothik_trainee' WHERE `entry` IN (16124,16127);
-UPDATE `creature_template` SET `ScriptName`='mob_gothik_dk' WHERE `entry` IN (16125,16148);
-UPDATE `creature_template` SET `ScriptName`='mob_gothik_rider' WHERE `entry` IN (16126,16150);
+UPDATE `creature_template` SET `ScriptName`='boss_archavon' WHERE `entry`=31125;
+UPDATE `creature_template` SET `ScriptName`='boss_emalon' WHERE `entry`=33993;
+UPDATE `creature_template` SET `ScriptName`='npc_tempest_minion' WHERE `entry`=33998;
+UPDATE `creature_template` SET `ScriptName`='npc_tempest_warder' WHERE `entry`=34015;
+UPDATE `creature_template` SET `ScriptName`='boss_koralon' WHERE `entry`=35013;
+UPDATE `instance_template` SET `script`='instance_vault_of_archavon' WHERE `map`=624;
