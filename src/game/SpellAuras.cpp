@@ -574,7 +574,7 @@ Aura* CreateAura(SpellEntry const* spellproto, uint32 eff, int32 *currentBasePoi
 
 Unit* Aura::GetCaster() const
 {
-    if(m_caster_guid==m_target->GetGUID())
+    if(m_caster_guid == m_target->GetGUID())
         return m_target;
 
     //return ObjectAccessor::GetUnit(*m_target,m_caster_guid);
@@ -1528,10 +1528,10 @@ void Aura::HandleAddTargetTrigger(bool apply, bool /*Real*/)
 
 void Aura::TriggerSpell()
 {
-    Unit* caster = GetCaster();
+    const uint64& casterGUID = GetCasterGUID();
     Unit* target = GetTriggerTarget();
 
-    if(!caster || !target)
+    if(!casterGUID || !target)
         return;
 
     // generic casting code with custom spells and target/caster customs
@@ -1557,9 +1557,9 @@ void Aura::TriggerSpell()
                     case 17949:
                     case 27252:
                     {
-                        if (caster->GetTypeId()!=TYPEID_PLAYER)
+                        if (target->GetTypeId() != TYPEID_PLAYER)
                             return;
-                        Item* item = ((Player*)caster)->GetWeaponForAttack(BASE_ATTACK);
+                        Item* item = ((Player*)target)->GetWeaponForAttack(BASE_ATTACK);
                         if (!item)
                             return;
                         uint32 enchant_id = 0;
@@ -1574,10 +1574,10 @@ void Aura::TriggerSpell()
                                  return;
                         }
                         // remove old enchanting before applying new
-                        ((Player*)caster)->ApplyEnchantment(item,TEMP_ENCHANTMENT_SLOT,false);
+                        ((Player*)target)->ApplyEnchantment(item,TEMP_ENCHANTMENT_SLOT,false);
                         item->SetEnchantment(TEMP_ENCHANTMENT_SLOT, enchant_id, m_modifier.periodictime+1000, 0);
                         // add new enchanting
-                        ((Player*)caster)->ApplyEnchantment(item,TEMP_ENCHANTMENT_SLOT,true);
+                        ((Player*)target)->ApplyEnchantment(item,TEMP_ENCHANTMENT_SLOT,true);
                         return;
                     }
 //                    // Periodic Mana Burn
@@ -1620,14 +1620,13 @@ void Aura::TriggerSpell()
                     // Restoration
                     case 23493:
                     {
-                        int32 heal = caster->GetMaxHealth() / 10;
-                        caster->DealHeal(caster, heal, auraSpellInfo);
+                        int32 heal = target->GetMaxHealth() / 10;
+                        target->DealHeal(target, heal, auraSpellInfo);
 
-                        int32 mana = caster->GetMaxPower(POWER_MANA);
-                        if (mana)
+                        if (int32 mana = target->GetMaxPower(POWER_MANA))
                         {
                             mana /= 10;
-                            caster->EnergizeBySpell(caster, 23493, mana, POWER_MANA);
+                            target->EnergizeBySpell(target, 23493, mana, POWER_MANA);
                         }
                         return;
                     }
@@ -1657,7 +1656,7 @@ void Aura::TriggerSpell()
                     case 25371:
                     {
                         int32 bpDamage = target->GetMaxHealth()*10/100;
-                        caster->CastCustomSpell(target, 25373, &bpDamage, NULL, NULL, true, NULL, this);
+                        target->CastCustomSpell(target, 25373, &bpDamage, NULL, NULL, true, NULL, this, casterGUID);
                         return;
                     }
 //                    // Pain Spike
@@ -1684,7 +1683,7 @@ void Aura::TriggerSpell()
                     case 27808:
                     {
                         int32 bpDamage = target->GetMaxHealth()*26/100;
-                        caster->CastCustomSpell(target, 29879, &bpDamage, NULL, NULL, true, NULL, this);
+                        target->CastCustomSpell(target, 29879, &bpDamage, NULL, NULL, true, NULL, this, casterGUID);
                         return;
                     }
 //                    // Detonate Mana
@@ -1735,10 +1734,13 @@ void Aura::TriggerSpell()
                     // Extract Gas
                     case 30427:
                     {
+                        Unit* caster = GetCaster();
+                        if (!caster)
+                            return;
                         // move loot to player inventory and despawn target
                         if(caster->GetTypeId() ==TYPEID_PLAYER &&
-                                target->GetTypeId() == TYPEID_UNIT &&
-                                ((Creature*)target)->GetCreatureInfo()->type == CREATURE_TYPE_GAS_CLOUD)
+                           target->GetTypeId() == TYPEID_UNIT &&
+                           ((Creature*)target)->GetCreatureInfo()->type == CREATURE_TYPE_GAS_CLOUD)
                         {
                             Player* player = (Player*)caster;
                             Creature* creature = (Creature*)target;
@@ -1778,13 +1780,18 @@ void Aura::TriggerSpell()
                     case 31373:
                     {
                         // Summon Elemental after create item
-                        caster->SummonCreature(17870, 0, 0, 0, caster->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 0);
+                        target->SummonCreature(17870, 0, 0, 0, target->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 0);
                         return;
                     }
 //                    // Bloodmyst Tesla
 //                    case 31611: break;
-//                    // Doomfire
-//                    case 31944: break;
+                    // Doomfire
+                    case 31944:
+                    {
+                        int32 damage = m_modifier.m_amount * ((float)(GetAuraDuration() + m_modifier.periodictime) / GetAuraMaxDuration());
+                        target->CastCustomSpell(target, 31969, &damage, NULL, NULL, true, NULL, this, casterGUID);
+                        return;
+                    }
 //                    // Teleport Test
 //                    case 32236: break;
 //                    // Earthquake
@@ -1800,9 +1807,9 @@ void Aura::TriggerSpell()
                     {
                         // cast 24 spells 34269-34289, 34314-34316
                         for(uint32 spell_id = 34269; spell_id != 34290; ++spell_id)
-                            caster->CastSpell(m_target, spell_id, true);
+                            target->CastSpell(target, spell_id, true, NULL, this, casterGUID);
                         for(uint32 spell_id = 34314; spell_id != 34317; ++spell_id)
-                            caster->CastSpell(m_target, spell_id, true);
+                            target->CastSpell(target, spell_id, true, NULL, this, casterGUID);
                         return;
                     }
 //                    // Gravity Lapse
@@ -1893,7 +1900,10 @@ void Aura::TriggerSpell()
                         if(m_target->GetTypeId() != TYPEID_UNIT)
                             return;
 
-                        caster->CastSpell(caster, 38495, true);
+                        if (Unit* caster = GetCaster())
+                            caster->CastSpell(caster, 38495, true, NULL, this);
+                        else
+                            return;
 
                         Creature* creatureTarget = (Creature*)m_target;
 
@@ -2164,7 +2174,7 @@ void Aura::TriggerSpell()
                         bool all = true;
                         for(int i = 0; i < MAX_TOTEM; ++i)
                         {
-                            if(!caster->m_TotemSlot[i])
+                            if(!target->m_TotemSlot[i])
                             {
                                 all = false;
                                 break;
@@ -2172,9 +2182,9 @@ void Aura::TriggerSpell()
                         }
 
                         if(all)
-                            caster->CastSpell(caster, 38437, true);
+                            target->CastSpell(target, 38437, true, NULL, this);
                         else
-                            caster->RemoveAurasDueToSpell(38437);
+                            target->RemoveAurasDueToSpell(38437);
                         return;
                     }
                     default:
@@ -2221,14 +2231,14 @@ void Aura::TriggerSpell()
                 // 2) maybe aura must be replace by new with accumulative stat mods instead stacking
 
                 // prevent cast by triggered auras
-                if(m_caster_guid == m_target->GetGUID())
+                if(casterGUID == target->GetGUID())
                     return;
 
                 // stop triggering after each affected stats lost > 90
                 int32 intelectLoss = 0;
                 int32 spiritLoss = 0;
 
-                Unit::AuraList const& mModStat = m_target->GetAurasByType(SPELL_AURA_MOD_STAT);
+                Unit::AuraList const& mModStat = target->GetAurasByType(SPELL_AURA_MOD_STAT);
                 for(Unit::AuraList::const_iterator i = mModStat.begin(); i != mModStat.end(); ++i)
                 {
                     if ((*i)->GetId() == 1010)
@@ -2245,19 +2255,18 @@ void Aura::TriggerSpell()
                 if(intelectLoss <= -90 && spiritLoss <= -90)
                     return;
 
-                caster = target;
                 break;
             }
             // Mana Tide
             case 16191:
             {
-                caster->CastCustomSpell(target, trigger_spell_id, &m_modifier.m_amount, NULL, NULL, true, NULL, this);
+                target->CastCustomSpell(target, trigger_spell_id, &m_modifier.m_amount, NULL, NULL, true, NULL, this);
                 return;
             }
             // Ground Slam
             case 33525:
             {
-                target->CastSpell(target, trigger_spell_id, true);
+                target->CastSpell(target, trigger_spell_id, true, NULL, this, casterGUID);
                 return;
             }
             // Intense Cold
@@ -2269,31 +2278,37 @@ void Aura::TriggerSpell()
             // Beacon of Light
             case 53563:
                 // original caster must be target (beacon)
-                m_target->CastSpell(m_target,trigger_spell_id,true,NULL,this,m_target->GetGUID());
+                target->CastSpell(target, trigger_spell_id, true, NULL, this, target->GetGUID());
                 return;
         }
     }
 
     // All ok cast by default case
     if(triggeredSpellInfo)
-        caster->CastSpell(target, triggeredSpellInfo, true, 0, this);
-    else if(target->GetTypeId()!=TYPEID_UNIT || !Script->EffectDummyCreature(caster, GetId(), GetEffIndex(), (Creature*)target))
-        sLog.outError("Aura::TriggerSpell: Spell %u have 0 in EffectTriggered[%d], not handled custom case?",GetId(),GetEffIndex());
+        target->CastSpell(target, triggeredSpellInfo, true, NULL, this, casterGUID);
+    else
+    {
+        if (Unit* caster = GetCaster())
+        {
+            if(target->GetTypeId() != TYPEID_UNIT || !Script->EffectDummyCreature(caster, GetId(), GetEffIndex(), (Creature*)target))
+                sLog.outError("Aura::TriggerSpell: Spell %u have 0 in EffectTriggered[%d], not handled custom case?",GetId(),GetEffIndex());
+        }
+    }
 }
 
 void Aura::TriggerSpellWithValue()
 {
-    Unit* caster = GetCaster();
+    const uint64& casterGUID = GetCasterGUID();
     Unit* target = GetTriggerTarget();
 
-    if(!caster || !target)
+    if(!casterGUID || !target)
         return;
 
     // generic casting code with custom spells and target/caster customs
     uint32 trigger_spell_id = GetSpellProto()->EffectTriggerSpell[m_effIndex];
     int32  basepoints0 = this->GetModifier()->m_amount;
 
-    caster->CastCustomSpell(target, trigger_spell_id, &basepoints0, NULL, NULL, true, NULL, this);
+    target->CastCustomSpell(target, trigger_spell_id, &basepoints0, NULL, NULL, true, NULL, this, casterGUID);
 }
 
 /*********************************************************/
@@ -2620,6 +2635,16 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         else
                             m_target->PlayDirectSound(14972, (Player *)m_target);
                     }
+                    return;
+                case 10848:
+                case 36978:
+                case 40131:
+                case 27978:
+                case 33900:
+                    if (apply)
+                        m_target->m_AuraFlags |= UNIT_AURAFLAG_ALIVE_INVISIBLE;
+                    else
+                        m_target->m_AuraFlags |= ~UNIT_AURAFLAG_ALIVE_INVISIBLE;
                     return;
                 // Tricks of the Trade - 15% damage bonus effect for redirection target
                 case 59628:
@@ -6684,9 +6709,6 @@ void Aura::HandleSchoolAbsorb(bool apply, bool Real)
 
 void Aura::PeriodicTick()
 {
-    if (!m_target->isAlive() != IsDeathOnlySpell(GetSpellProto()))
-        return;
-
     switch(m_modifier.m_auraname)
     {
         case SPELL_AURA_PERIODIC_DAMAGE:

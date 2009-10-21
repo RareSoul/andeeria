@@ -105,6 +105,7 @@ Unit::Unit()
     //m_AurasCheck = 2000;
     //m_removeAuraTimer = 4;
     m_AurasUpdateIterator = m_Auras.end();
+    m_AuraFlags = 0;
 
     m_Visibility = VISIBILITY_ON;
 
@@ -10248,8 +10249,7 @@ bool Unit::isTargetableForAttack(bool inverseAlive /*=false*/) const
     if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE))
         return false;
 
-    // target is dead or has ghost-flag
-    if ((!isAlive() || (GetTypeId() == TYPEID_UNIT && ((Creature *)this)->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_GHOST)) != inverseAlive)
+    if ((isAlive() && !isInvisibleForAlive()) == inverseAlive)
         return false;
 
     return IsInWorld() && !hasUnitState(UNIT_STAT_DIED)&& !isInFlight() /*&& !isStealth()*/;
@@ -10346,7 +10346,7 @@ bool Unit::isVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
 
     Map& _map = *u->GetMap();
     // Grid dead/alive checks
-    if( u->GetTypeId()==TYPEID_PLAYER)
+    if (u->GetTypeId()==TYPEID_PLAYER)
     {
         // non visible at grid for any stealth state
         if(!IsVisibleInGridForPlayer((Player *)u))
@@ -10364,15 +10364,15 @@ bool Unit::isVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
     }
 
     // always seen by owner
-    if(GetCharmerOrOwnerGUID()==u->GetGUID())
+    if (GetCharmerOrOwnerGUID()==u->GetGUID())
         return true;
 
     // always seen by far sight caster
-    if( u->GetTypeId()==TYPEID_PLAYER && ((Player*)u)->GetFarSight()==GetGUID())
+    if (u->GetTypeId()==TYPEID_PLAYER && ((Player*)u)->GetFarSight()==GetGUID())
         return true;
 
     // different visible distance checks
-    if(u->isInFlight())                                     // what see player in flight
+    if (u->isInFlight())                                    // what see player in flight
     {
         // use object grey distance for all (only see objects any way)
         if (!IsWithinDistInMap(viewPoint,World::GetMaxVisibleDistanceInFlight()+(inVisibleList ? World::GetVisibleObjectGreyDistance() : 0.0f), is3dDistance))
@@ -10423,6 +10423,9 @@ bool Unit::isVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
         else
             return true;
     }
+
+    if (u->isAlive() && isInvisibleForAlive())
+        return false;
 
     // non faction visibility non-breakable for non-GMs
     if (m_Visibility == VISIBILITY_OFF)
@@ -11384,6 +11387,15 @@ Unit* Unit::GetUnit(WorldObject& object, uint64 guid)
 bool Unit::isVisibleForInState( Player const* u, WorldObject const* viewPoint, bool inVisibleList ) const
 {
     return isVisibleForOrDetect(u, viewPoint, false, inVisibleList, false);
+}
+
+/// returns true if creature can't be seen by alive units
+bool Unit::isInvisibleForAlive() const
+{
+    if (m_AuraFlags & UNIT_AURAFLAG_ALIVE_INVISIBLE)
+        return true;
+    // TODO: maybe spiritservices also have just an aura
+    return isSpiritService();
 }
 
 uint32 Unit::GetCreatureType() const
