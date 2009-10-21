@@ -119,6 +119,11 @@ struct MANGOS_DLL_DECL boss_kelthuzadAI : public ScriptedAI
 
     void Aggro(Unit *unit)
     {
+        if (!unit)
+            return;
+
+        error_log("Debug: Kel'thuzad event beginded by %s",unit->GetName());
+
         DoScriptText(SAY_SUMMON_MINIONS, m_creature);
         
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
@@ -135,9 +140,9 @@ struct MANGOS_DLL_DECL boss_kelthuzadAI : public ScriptedAI
         {
             if(Guardians[i])
             {
-                Unit* guard = Unit::GetUnit((*m_creature), Guardians[i]);
+                Creature* guard = (Creature*)Unit::GetUnit((*m_creature), Guardians[i]);
                 if(guard && guard->isAlive())
-                    guard->DealDamage(guard, guard->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+                    guard->ForcedDespawn();
             }
         }
     }
@@ -169,9 +174,12 @@ struct MANGOS_DLL_DECL boss_kelthuzadAI : public ScriptedAI
                 int i = irand(0,5);
                 Unit *mob = m_creature->SummonCreature(CR_SKELETON, AddX[i], AddY[i], AddZ[i], 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000);
                 Unit *target = SelectUnit(SELECT_TARGET_RANDOM,0);
-                mob->AddThreat(target, 1.0f);
-                mob->GetMotionMaster()->MoveChase(target);
-				Skeleton_Timer = 5000;
+                if (mob && target)
+                {
+                    mob->AddThreat(target, 1.0f);
+                    mob->GetMotionMaster()->MoveChase(target);
+                }
+                Skeleton_Timer = 5000;
             }
             else Skeleton_Timer -= diff;
 
@@ -180,8 +188,11 @@ struct MANGOS_DLL_DECL boss_kelthuzadAI : public ScriptedAI
                 int i = irand(0,5);
                 Unit *mob = m_creature->SummonCreature(CR_ABOMINATION, AddX[i], AddY[i], AddZ[i], 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000);
 				Unit *target = SelectUnit(SELECT_TARGET_RANDOM,0);
-                mob->AddThreat(target, 1.0f);
-                mob->GetMotionMaster()->MoveChase(target);
+                if (mob && target)
+                {
+                    mob->AddThreat(target, 1.0f);
+                    mob->GetMotionMaster()->MoveChase(target);
+                }
                 Abomination_Timer = Heroic ? (30000+rand()%15000) : (40000+rand()%15000);
             }
             else Abomination_Timer -= diff;
@@ -191,8 +202,11 @@ struct MANGOS_DLL_DECL boss_kelthuzadAI : public ScriptedAI
                 int i = irand(0,5);
                 Unit *mob = m_creature->SummonCreature(CR_BANSHEE, AddX[i], AddY[i], AddZ[i], 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000);
                 Unit *target = SelectUnit(SELECT_TARGET_RANDOM,0);
-                mob->AddThreat(target, 1.0f);
-                mob->GetMotionMaster()->MoveChase(target);
+                if (mob && target)
+                {
+                    mob->AddThreat(target, 1.0f);
+                    mob->GetMotionMaster()->MoveChase(target);
+                }
 				Banshee_Timer = Heroic ? (17000+rand()%10000) : (20000+rand()%15000);
             }
             else Banshee_Timer -= diff;
@@ -260,11 +274,13 @@ struct MANGOS_DLL_DECL boss_kelthuzadAI : public ScriptedAI
                     guard = DoSpawnCreature(CR_GUARDIAN, 40, 0, 5, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000);
                     if(guard)
                     {
-						Unit *target = SelectUnit(SELECT_TARGET_RANDOM,0);
-                        guard->AddThreat(target, 1.0f);
-                        guard->GetMotionMaster()->MoveChase(m_creature);
-                        Guardians[Guardian_Count] = guard->GetGUID();
-                        Guardian_Count++;
+						if (Unit *target = SelectUnit(SELECT_TARGET_RANDOM,0))
+                        {
+                            guard->AddThreat(target, 1.0f);
+                            guard->GetMotionMaster()->MoveChase(m_creature);
+                            Guardians[Guardian_Count] = guard->GetGUID();
+                            Guardian_Count++;
+                        }
                     }
                     Guardian_Timer = 8000;
                 }
