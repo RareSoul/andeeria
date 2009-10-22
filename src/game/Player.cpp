@@ -2096,7 +2096,7 @@ Creature* Player::GetNPCIfCanInteractWith(uint64 guid, uint32 npcflagmask)
         return NULL;
 
     // exist (we need look pets also for some interaction (quest/etc)
-    Creature *unit = ObjectAccessor::GetCreatureOrPetOrVehicle(*this,guid);
+    Creature *unit = GetMap()->GetCreatureOrPetOrVehicle(guid);
     if (!unit)
         return NULL;
 
@@ -12420,8 +12420,7 @@ void Player::PrepareQuestMenu( uint64 guid )
     QuestRelations* pObjectQIR;
 
     // pets also can have quests
-    Creature *pCreature = ObjectAccessor::GetCreatureOrPetOrVehicle(*this, guid);
-    if( pCreature )
+    if (Creature *pCreature = GetMap()->GetCreatureOrPetOrVehicle(guid))
     {
         pObject = (Object*)pCreature;
         pObjectQR  = &objmgr.mCreatureQuestRelations;
@@ -12515,8 +12514,7 @@ void Player::SendPreparedQuest(uint64 guid)
         std::string title = "";
 
         // need pet case for some quests
-        Creature *pCreature = ObjectAccessor::GetCreatureOrPetOrVehicle(*this,guid);
-        if (pCreature)
+        if (Creature *pCreature = GetMap()->GetCreatureOrPetOrVehicle(guid))
         {
             uint32 textid = pCreature->GetNpcTextId();
             GossipText const* gossiptext = objmgr.GetGossipText(textid);
@@ -12579,8 +12577,7 @@ Quest const * Player::GetNextQuest( uint64 guid, Quest const *pQuest )
     QuestRelations* pObjectQR;
     QuestRelations* pObjectQIR;
 
-    Creature *pCreature = ObjectAccessor::GetCreatureOrPetOrVehicle(*this,guid);
-    if( pCreature )
+    if (Creature *pCreature = GetMap()->GetCreatureOrPetOrVehicle(guid))
     {
         pObject = (Object*)pCreature;
         pObjectQR  = &objmgr.mCreatureQuestRelations;
@@ -19159,7 +19156,7 @@ void Player::UpdateForQuestWorldObjects()
         }
         else if(IS_CREATURE_GUID(*itr) || IS_VEHICLE_GUID(*itr))
         {
-            Creature *obj = ObjectAccessor::GetCreatureOrPetOrVehicle(*this, *itr);
+            Creature *obj = GetMap()->GetCreatureOrPetOrVehicle(*itr);
             if(!obj)
                 continue;
 

@@ -258,7 +258,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNoImmediateEffect,                         //203 SPELL_AURA_MOD_ATTACKER_MELEE_CRIT_DAMAGE  implemented in Unit::CalculateMeleeDamage and Unit::SpellCriticalDamageBonus
     &Aura::HandleNoImmediateEffect,                         //204 SPELL_AURA_MOD_ATTACKER_RANGED_CRIT_DAMAGE implemented in Unit::CalculateMeleeDamage and Unit::SpellCriticalDamageBonus
     &Aura::HandleNoImmediateEffect,                         //205 SPELL_AURA_MOD_ATTACKER_SPELL_CRIT_DAMAGE  implemented in Unit::SpellCriticalDamageBonus
-    &Aura::HandleNULL,                                      //206 SPELL_AURA_MOD_SPEED_MOUNTED
+    &Aura::HandleAuraModIncreaseFlightSpeed,                //206 SPELL_AURA_MOD_SPEED_MOUNTED
     &Aura::HandleAuraModIncreaseFlightSpeed,                //207 SPELL_AURA_MOD_INCREASE_FLIGHT_SPEED
     &Aura::HandleAuraModIncreaseFlightSpeed,                //208 SPELL_AURA_MOD_SPEED_FLIGHT, used only in spell: Flight Form (Passive)
     &Aura::HandleAuraModIncreaseFlightSpeed,                //209 SPELL_AURA_MOD_FLIGHT_SPEED_ALWAYS
@@ -2214,6 +2214,7 @@ void Aura::TriggerSpell()
             case 52987: // Heal effect - Rank 3
             case 52988: // Heal effect - Rank 4
             {
+                Unit* caster = GetCaster();
                 if (!target->isAlive())
                 {
                     if (Unit* caster = GetCaster())
@@ -4801,11 +4802,9 @@ void Aura::HandleAuraPeriodicDummy(bool apply, bool Real)
             {
                 case 48018:
                     if (apply)
-                        SendFakeAuraUpdate(62388,false);
-                    else
                     {
-                        m_target->RemoveGameObject(spell->Id,true);
-                        SendFakeAuraUpdate(62388,true);
+                        if (m_target->GetGameObject(spell->Id))
+                            m_target->RemoveGameObject(spell->Id,true);
                     }
                 break;
             }
@@ -4881,6 +4880,17 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
                             m_modifier.m_amount += int32(GetModifier()->m_amount*0.35);
                     }
 
+                    return;
+                }
+                break;
+            }
+            case SPELLFAMILY_WARLOCK:
+            {
+                // Drain Soul
+                if (m_spellProto->SpellFamilyFlags & UI64LIT(0x0000000000004000))
+                {
+                    if (m_target->GetHealth() * 100 / m_target->GetMaxHealth() <= 25)
+                       m_modifier.m_amount *= 4;
                     return;
                 }
                 break;
@@ -7559,7 +7569,12 @@ void Aura::PeriodicDummyTick()
             {
                 case 48018:
                     GameObject* obj = m_target->GetGameObject(spell->Id);
-                    if (!obj) return;
+                    if (!obj)
+                    {
+                        m_target->RemoveAurasDueToSpell(spell->Id);
+                        SendFakeAuraUpdate(62388,true);
+                        return;
+                    }
                     // We must take a range of teleport spell, not summon.
                     const SpellEntry* goToCircleSpell = sSpellStore.LookupEntry(48020);
                     if (m_target->IsWithinDist(obj,GetSpellMaxRange(sSpellRangeStore.LookupEntry(goToCircleSpell->rangeIndex))))

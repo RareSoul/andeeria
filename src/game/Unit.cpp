@@ -10252,7 +10252,7 @@ bool Unit::isTargetableForAttack(bool inverseAlive /*=false*/) const
     if ((isAlive() && !isInvisibleForAlive()) == inverseAlive)
         return false;
 
-    return IsInWorld() && !hasUnitState(UNIT_STAT_DIED)&& !isInFlight() /*&& !isStealth()*/;
+    return IsInWorld() && !hasUnitState(UNIT_STAT_DIED) && !isInFlight();
 }
 
 int32 Unit::ModifyHealth(int32 dVal)
@@ -10411,6 +10411,10 @@ bool Unit::isVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
             return false;
     }
 
+    if (u->isAlive() && isInvisibleForAlive())
+        if (u->GetTypeId() == TYPEID_PLAYER && !((Player *)u)->isGameMaster())
+            return false;
+
     // Visible units, always are visible for all units, except for units under invisibility and phases
     if (m_Visibility == VISIBILITY_ON && u->m_invisibilityMask==0 && InSamePhase(u))
         return true;
@@ -10423,9 +10427,6 @@ bool Unit::isVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
         else
             return true;
     }
-
-    if (u->isAlive() && isInvisibleForAlive())
-        return false;
 
     // non faction visibility non-breakable for non-GMs
     if (m_Visibility == VISIBILITY_OFF)
@@ -10646,7 +10647,7 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced)
             if (IsMounted()) // Use on mount auras
                 main_speed_mod  = GetMaxPositiveAuraModifier(SPELL_AURA_MOD_INCREASE_FLIGHT_SPEED);
             else             // Use not mount (shapeshift for example) auras (should stack)
-                main_speed_mod  = GetTotalAuraModifier(SPELL_AURA_MOD_SPEED_FLIGHT);
+                main_speed_mod  = GetTotalAuraModifier(SPELL_AURA_MOD_SPEED_FLIGHT) + GetTotalAuraModifier(SPELL_AURA_MOD_SPEED_MOUNTED);
             stack_bonus     = GetTotalAuraMultiplier(SPELL_AURA_MOD_FLIGHT_SPEED_ALWAYS);
             non_stack_bonus = (100.0 + GetMaxPositiveAuraModifier(SPELL_AURA_MOD_FLIGHT_SPEED_NOT_STACK))/100.0f;
             break;
