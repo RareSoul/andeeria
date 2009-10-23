@@ -100,20 +100,18 @@ uint16 GetSpellAuraMaxTicks(SpellEntry const* spellInfo)
     if(DotDuration > 30000)
         DotDuration = 30000;
 
-    int j = 0;
-    for( ; j < 3; j++)
+    for (int j = 0; j < 3; ++j)
     {
-        if( spellInfo->Effect[j] == SPELL_EFFECT_APPLY_AURA && (
+        if (spellInfo->Effect[j] == SPELL_EFFECT_APPLY_AURA && (
             spellInfo->EffectApplyAuraName[j] == SPELL_AURA_PERIODIC_DAMAGE ||
             spellInfo->EffectApplyAuraName[j] == SPELL_AURA_PERIODIC_HEAL ||
             spellInfo->EffectApplyAuraName[j] == SPELL_AURA_PERIODIC_LEECH) )
         {
+            if (spellInfo->EffectAmplitude[j] != 0)
+                return DotDuration / spellInfo->EffectAmplitude[j];
             break;
         }
     }
-
-    if(spellInfo->EffectAmplitude[j] != 0)
-        return DotDuration / spellInfo->EffectAmplitude[j];
 
     return 6;
 }
@@ -1580,6 +1578,11 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                 // Battle Shout and Rampage
                 if( (spellInfo_1->SpellIconID == 456 && spellInfo_2->SpellIconID == 2006) ||
                     (spellInfo_2->SpellIconID == 456 && spellInfo_1->SpellIconID == 2006) )
+                    return false;
+
+                // Taste of Blood and Sudden Death
+                if( (spellInfo_1->Id == 52437 && spellInfo_2->Id == 60503) ||
+                    (spellInfo_2->Id == 52437 && spellInfo_1->Id == 60503) )
                     return false;
             }
 

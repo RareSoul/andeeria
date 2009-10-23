@@ -4802,9 +4802,11 @@ void Aura::HandleAuraPeriodicDummy(bool apply, bool Real)
             {
                 case 48018:
                     if (apply)
+                        SendFakeAuraUpdate(62388,false);
+                    else
                     {
-                        if (m_target->GetGameObject(spell->Id))
-                            m_target->RemoveGameObject(spell->Id,true);
+                        m_target->RemoveGameObject(spell->Id,true);
+                        SendFakeAuraUpdate(62388,true);
                     }
                 break;
             }
@@ -4880,17 +4882,6 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
                             m_modifier.m_amount += int32(GetModifier()->m_amount*0.35);
                     }
 
-                    return;
-                }
-                break;
-            }
-            case SPELLFAMILY_WARLOCK:
-            {
-                // Drain Soul
-                if (m_spellProto->SpellFamilyFlags & UI64LIT(0x0000000000004000))
-                {
-                    if (m_target->GetHealth() * 100 / m_target->GetMaxHealth() <= 25)
-                       m_modifier.m_amount *= 4;
                     return;
                 }
                 break;
@@ -6584,11 +6575,6 @@ void Aura::HandleSchoolAbsorb(bool apply, bool Real)
                         DoneActualBenefit = caster->SpellBaseHealingBonus(GetSpellSchoolMask(m_spellProto)) * 0.75f;
                     }
                     break;
-                case SPELLFAMILY_DRUID:
-                    // Savage Defense (amount store original percent of attack power applied)
-                    if (m_spellProto->SpellIconID == 50)    // only spell with this aura fit
-                        m_modifier.m_amount = int32(m_modifier.m_amount * m_target->GetTotalAttackPowerValue(BASE_ATTACK) / 100);
-                    break;
                 default:
                     break;
             }
@@ -7569,12 +7555,7 @@ void Aura::PeriodicDummyTick()
             {
                 case 48018:
                     GameObject* obj = m_target->GetGameObject(spell->Id);
-                    if (!obj)
-                    {
-                        m_target->RemoveAurasDueToSpell(spell->Id);
-                        SendFakeAuraUpdate(62388,true);
-                        return;
-                    }
+                    if (!obj) return;
                     // We must take a range of teleport spell, not summon.
                     const SpellEntry* goToCircleSpell = sSpellStore.LookupEntry(48020);
                     if (m_target->IsWithinDist(obj,GetSpellMaxRange(sSpellRangeStore.LookupEntry(goToCircleSpell->rangeIndex))))
