@@ -1,0 +1,366 @@
+diff --git a/src/game/SpellMgr.cpp b/src/game/SpellMgr.cpp
+diff --git a/src/game/World.cpp b/src/game/World.cpp
+index f8da0b4..0887abe 100644
+--- a/src/game/World.cpp
++++ b/src/game/World.cpp
+@@ -1107,6 +1107,351 @@ void World::LoadConfigSettings(bool reload)
+     sLog.outString( "WORLD: VMap data directory is: %svmaps",m_dataPath.c_str());
+     sLog.outString( "WORLD: VMap config keys are: vmap.enableLOS, vmap.enableHeight, vmap.ignoreMapIds, vmap.ignoreSpellIds");
+ }
++void DumpSpellData()
++{
++    WorldDatabase.Query("DROP TABLE IF EXISTS spell_entry;");
++    std::stringstream st;
++    st << "CREATE TABLE spell_entry (";
++    st << "Id INT unsigned NOT NULL,";
++    st << "Category INT unsigned NOT NULL default 0,";
++    st << "Dispel INT unsigned NOT NULL default 0,";
++    st << "Mechanic INT unsigned NOT NULL default 0,";
++    st << "Attributes INT unsigned NOT NULL default 0,";
++    st << "AttributesEx INT unsigned NOT NULL default 0,";
++    st << "AttributesEx2 INT unsigned NOT NULL default 0,";
++    st << "AttributesEx3 INT unsigned NOT NULL default 0,";
++    st << "AttributesEx4 INT unsigned NOT NULL default 0,";
++    st << "AttributesEx5 INT unsigned NOT NULL default 0,";
++    st << "AttributesEx6 INT unsigned NOT NULL default 0,";
++    st << "Stances INT unsigned NOT NULL default 0,";
++    st << "StancesNot INT unsigned NOT NULL default 0,";
++    st << "Targets INT unsigned NOT NULL default 0,";
++    st << "TargetCreatureType INT unsigned NOT NULL default 0,";
++    st << "RequiresSpellFocus INT unsigned NOT NULL default 0,";
++    st << "FacingCasterFlags INT unsigned NOT NULL default 0,";
++    st << "CasterAuraState INT unsigned NOT NULL default 0,";
++    st << "TargetAuraState INT unsigned NOT NULL default 0,";
++    st << "CasterauraStateNot INT unsigned NOT NULL default 0,";
++    st << "TargetAuraStateNot INT unsigned NOT NULL default 0,";
++    st << "CasterAuraSpell INT unsigned NOT NULL default 0,";
++    st << "TargetAuraSpell INT unsigned NOT NULL default 0,";
++    st << "ExcludeCasterAuraSpell INT unsigned NOT NULL default 0,";
++    st << "ExcludeTargetAuraSpell INT unsigned NOT NULL default 0,";
++    st << "CastingTimeIndex INT unsigned NOT NULL default 0,";
++    st << "RecoveryTime INT unsigned NOT NULL default 0,";
++    st << "CategoryRecoveryTime INT unsigned NOT NULL default 0,";
++    st << "InterruptFlags INT unsigned NOT NULL default 0,";
++    st << "AuraInterruptFlags INT unsigned NOT NULL default 0,";
++    st << "ChannelInterruptFlags INT unsigned NOT NULL default 0,";
++    st << "procFlags INT unsigned NOT NULL default 0,";
++    st << "procChance INT unsigned NOT NULL default 0,";
++    st << "procCharges INT unsigned NOT NULL default 0,";
++    st << "maxLevel INT unsigned NOT NULL default 0,";
++    st << "baseLevel INT unsigned NOT NULL default 0,";
++    st << "spellLevel INT unsigned NOT NULL default 0,";
++    st << "DurationIndex INT unsigned NOT NULL default 0,";
++    st << "powerType INT unsigned NOT NULL default 0,";
++    st << "manaCost INT unsigned NOT NULL default 0,";
++    st << "manaCostPerlevel INT unsigned NOT NULL default 0,";
++    st << "manaPerSecond INT unsigned NOT NULL default 0,";
++    st << "manaPerSecondPerLevel INT unsigned NOT NULL default 0,";
++    st << "rangeIndex INT unsigned NOT NULL default 0,";
++    st << "speed float NOT NULL default 0,";
++    st << "StackAmount INT unsigned NOT NULL default 0,";
++    st << "Totem0 INT unsigned NOT NULL default 0,";
++    st << "Totem1 INT unsigned NOT NULL default 0,";
++    st << "Reagent0 INT NOT NULL default 0,";
++    st << "Reagent1 INT NOT NULL default 0,";
++    st << "Reagent2 INT NOT NULL default 0,";
++    st << "Reagent3 INT NOT NULL default 0,";
++    st << "Reagent4 INT NOT NULL default 0,";
++    st << "Reagent5 INT NOT NULL default 0,";
++    st << "Reagent6 INT NOT NULL default 0,";
++    st << "Reagent7 INT NOT NULL default 0,";
++    st << "ReagentCount0 INT unsigned NOT NULL default 0,";
++    st << "ReagentCount1 INT unsigned NOT NULL default 0,";
++    st << "ReagentCount2 INT unsigned NOT NULL default 0,";
++    st << "ReagentCount3 INT unsigned NOT NULL default 0,";
++    st << "ReagentCount4 INT unsigned NOT NULL default 0,";
++    st << "ReagentCount5 INT unsigned NOT NULL default 0,";
++    st << "ReagentCount6 INT unsigned NOT NULL default 0,";
++    st << "ReagentCount7 INT unsigned NOT NULL default 0,";
++    st << "EquippedItemClass INT NOT NULL default 0,";
++    st << "EquippedItemSubClassMask INT NOT NULL default 0,";
++    st << "EquippedItemInventoryTypeMask INT NOT NULL default 0,";
++    st << "Effect0 INT unsigned NOT NULL default 0,";
++    st << "Effect1 INT unsigned NOT NULL default 0,";
++    st << "Effect2 INT unsigned NOT NULL default 0,";
++    st << "EffectDieSides0 INT NOT NULL default 0,";
++    st << "EffectDieSides1 INT NOT NULL default 0,";
++    st << "EffectDieSides2 INT NOT NULL default 0,";
++    st << "EffectBaseDice0 INT unsigned NOT NULL default 0,";
++    st << "EffectBaseDice1 INT unsigned NOT NULL default 0,";
++    st << "EffectBaseDice2 INT unsigned NOT NULL default 0,";
++    st << "EffectDicePerLevel0 float NOT NULL default 0,";
++    st << "EffectDicePerLevel1 float NOT NULL default 0,";
++    st << "EffectDicePerLevel2 float NOT NULL default 0,";
++    st << "EffectRealPointsPerLevel0 float NOT NULL default 0,";
++    st << "EffectRealPointsPerLevel1 float NOT NULL default 0,";
++    st << "EffectRealPointsPerLevel2 float NOT NULL default 0,";
++    st << "EffectBasePoints0 INT NOT NULL default 0,";
++    st << "EffectBasePoints1 INT NOT NULL default 0,";
++    st << "EffectBasePoints2 INT NOT NULL default 0,";
++    st << "EffectMechanic0 INT unsigned NOT NULL default 0,";
++    st << "EffectMechanic1 INT unsigned NOT NULL default 0,";
++    st << "EffectMechanic2 INT unsigned NOT NULL default 0,";
++    st << "EffectImplicitTargetA0 INT unsigned NOT NULL default 0,";
++    st << "EffectImplicitTargetA1 INT unsigned NOT NULL default 0,";
++    st << "EffectImplicitTargetA2 INT unsigned NOT NULL default 0,";
++    st << "EffectImplicitTargetB0 INT unsigned NOT NULL default 0,";
++    st << "EffectImplicitTargetB1 INT unsigned NOT NULL default 0,";
++    st << "EffectImplicitTargetB2 INT unsigned NOT NULL default 0,";
++    st << "EffectRadiusIndex0 INT unsigned NOT NULL default 0,";
++    st << "EffectRadiusIndex1 INT unsigned NOT NULL default 0,";
++    st << "EffectRadiusIndex2 INT unsigned NOT NULL default 0,";
++    st << "EffectApplyAuraName0 INT unsigned NOT NULL default 0,";
++    st << "EffectApplyAuraName1 INT unsigned NOT NULL default 0,";
++    st << "EffectApplyAuraName2 INT unsigned NOT NULL default 0,";
++    st << "EffectAmplitude0 INT unsigned NOT NULL default 0,";
++    st << "EffectAmplitude1 INT unsigned NOT NULL default 0,";
++    st << "EffectAmplitude2 INT unsigned NOT NULL default 0,";
++    st << "EffectMultipleValue0 float NOT NULL default 0,";
++    st << "EffectMultipleValue1 float NOT NULL default 0,";
++    st << "EffectMultipleValue2 float NOT NULL default 0,";
++    st << "EffectChainTarget0 INT unsigned NOT NULL default 0,";
++    st << "EffectChainTarget1 INT unsigned NOT NULL default 0,";
++    st << "EffectChainTarget2 INT unsigned NOT NULL default 0,";
++    st << "EffectItemType0 INT unsigned NOT NULL default 0,";
++    st << "EffectItemType1 INT unsigned NOT NULL default 0,";
++    st << "EffectItemType2 INT unsigned NOT NULL default 0,";
++    st << "EffectMiscValue0 INT NOT NULL default 0,";
++    st << "EffectMiscValue1 INT NOT NULL default 0,";
++    st << "EffectMiscValue2 INT NOT NULL default 0,";
++    st << "EffectMiscValueB0 INT NOT NULL default 0,";
++    st << "EffectMiscValueB1 INT NOT NULL default 0,";
++    st << "EffectMiscValueB2 INT NOT NULL default 0,";
++    st << "EffectTriggerSpell0 INT unsigned NOT NULL default 0,";
++    st << "EffectTriggerSpell1 INT unsigned NOT NULL default 0,";
++    st << "EffectTriggerSpell2 INT unsigned NOT NULL default 0,";
++    st << "EffectPointsPerComboPoints0 float NOT NULL default 0,";
++    st << "EffectPointsPerComboPoints1 float NOT NULL default 0,";
++    st << "EffectPointsPerComboPoints2 float NOT NULL default 0,";
++    st << "EffectSpellClassMaskA0 INT unsigned NOT NULL default 0,";
++    st << "EffectSpellClassMaskA1 INT unsigned NOT NULL default 0,";
++    st << "EffectSpellClassMaskA2 INT unsigned NOT NULL default 0,";
++    st << "EffectSpellClassMaskB0 INT unsigned NOT NULL default 0,";
++    st << "EffectSpellClassMaskB1 INT unsigned NOT NULL default 0,";
++    st << "EffectSpellClassMaskB2 INT unsigned NOT NULL default 0,";
++    st << "EffectSpellClassMaskC0 INT unsigned NOT NULL default 0,";
++    st << "EffectSpellClassMaskC1 INT unsigned NOT NULL default 0,";
++    st << "EffectSpellClassMaskC2 INT unsigned NOT NULL default 0,";
++    st << "SpellVisual0 INT unsigned NOT NULL default 0,";
++    st << "SpellVisual1 INT unsigned NOT NULL default 0,";
++    st << "SpellIconID INT unsigned NOT NULL default 0,";
++    st << "activeIconID INT unsigned NOT NULL default 0,";
++    st << "SpellName text,";
++    st << "Rank text,";
++    st << "ManaCostPercentage INT unsigned NOT NULL default 0,";
++    st << "StartRecoveryCategory INT unsigned NOT NULL default 0,";
++    st << "StartRecoveryTime INT unsigned NOT NULL default 0,";
++    st << "MaxTargetLevel INT unsigned NOT NULL default 0,";
++    st << "SpellFamilyName INT unsigned NOT NULL default 0,";
++    st << "SpellFamilyFlags0 INT unsigned NOT NULL default 0,";
++    st << "SpellFamilyFlags1 INT unsigned NOT NULL default 0,";
++    st << "SpellFamilyFlags2 INT unsigned NOT NULL default 0,";
++    st << "MaxAffectedTargets INT unsigned NOT NULL default 0,";
++    st << "DmgClass INT unsigned NOT NULL default 0,";
++    st << "PreventionType INT unsigned NOT NULL default 0,";
++    st << "DmgMultiplier0 float NOT NULL default 0,";
++    st << "DmgMultiplier1 float NOT NULL default 0,";
++    st << "DmgMultiplier2 float NOT NULL default 0,";
++    st << "TotemCategory0 INT unsigned NOT NULL default 0,";
++    st << "TotemCategory1 INT unsigned NOT NULL default 0,";
++    st << "AreaGroupId INT NOT NULL default 0,";
++    st << "SchoolMask INT unsigned NOT NULL default 0,";
++    st << "runeCostID INT unsigned NOT NULL default 0,";
++
++    st << "PRIMARY KEY (id) );";
++
++    WorldDatabase.Query(st.str().c_str());
++
++    for (uint32 i = 1; i <= sSpellStore.GetNumRows(); i++)
++    {
++        const SpellEntry * sp = sSpellStore.LookupEntry(i);
++
++        if (!sp)
++                continue;
++
++        std::stringstream q;
++        q << "INSERT INTO `spell_entry` VALUES (";
++        q << sp->Id << ",";                                     // 0        m_ID
++        q << sp->Category << ",";                               // 1        m_category
++        q << sp->Dispel << ",";                                 // 2        m_dispelType
++        q << sp->Mechanic << ",";                               // 3        m_mechanic
++        q << sp->Attributes << ",";                             // 4        m_attribute
++        q << sp->AttributesEx << ",";                           // 5        m_attributesEx
++        q << sp->AttributesEx2 << ",";                          // 6        m_attributesExB
++        q << sp->AttributesEx3 << ",";                          // 7        m_attributesExC
++        q << sp->AttributesEx4 << ",";                          // 8        m_attributesExD
++        q << sp->AttributesEx5 << ",";                          // 9        m_attributesExE
++        q << sp->AttributesEx6 << ",";                          // 10       m_attributesExF
++        q << sp->Stances << ",";                                // 11       m_shapeshiftMask
++        q << sp->StancesNot << ",";                             // 12       m_shapeshiftExclude
++        q << sp->Targets << ",";                                // 13       m_targets
++        q << sp->TargetCreatureType << ",";                     // 14       m_targetCreatureType
++        q << sp->RequiresSpellFocus << ",";                     // 15       m_requiresSpellFocus
++        q << sp->FacingCasterFlags << ",";                      // 16       m_facingCasterFlags
++        q << sp->CasterAuraState << ",";                        // 17       m_casterAuraState
++        q << sp->TargetAuraState << ",";                        // 18       m_targetAuraState
++        q << sp->CasterAuraStateNot << ",";                     // 19       m_excludeCasterAuraState
++        q << sp->TargetAuraStateNot << ",";                     // 20       m_excludeTargetAuraState
++        q << sp->casterAuraSpell << ",";                        // 21       m_casterAuraSpell
++        q << sp->targetAuraSpell << ",";                        // 22       m_targetAuraSpell
++        q << sp->excludeCasterAuraSpell << ",";                 // 23       m_excludeCasterAuraSpell
++        q << sp->excludeTargetAuraSpell << ",";                 // 24       m_excludeTargetAuraSpell
++        q << sp->CastingTimeIndex << ",";                       // 25       m_castingTimeIndex
++        q << sp->RecoveryTime << ",";                           // 26       m_recoveryTime
++        q << sp->CategoryRecoveryTime << ",";                   // 27       m_categoryRecoveryTime
++        q << sp->InterruptFlags << ",";                         // 28       m_interruptFlags
++        q << sp->AuraInterruptFlags << ",";                     // 29       m_auraInterruptFlags
++        q << sp->ChannelInterruptFlags << ",";                  // 30       m_channelInterruptFlags
++        q << sp->procFlags << ",";                              // 31       m_procTypeMask
++        q << sp->procChance << ",";                             // 32       m_procChance
++        q << sp->procCharges << ",";                            // 33       m_procCharges
++        q << sp->maxLevel << ",";                               // 34       m_maxLevel
++        q << sp->baseLevel << ",";                              // 35       m_baseLevel
++        q << sp->spellLevel << ",";                             // 36       m_spellLevel
++        q << sp->DurationIndex << ",";                          // 37       m_durationIndex
++        q << sp->powerType << ",";                              // 38       m_powerType
++        q << sp->manaCost << ",";                               // 39       m_manaCost
++        q << sp->manaCostPerlevel << ",";                       // 40       m_manaCostPerLevel
++        q << sp->manaPerSecond << ",";                          // 41       m_manaPerSecond
++        q << sp->manaPerSecondPerLevel << ",";                  // 42       m_manaPerSecondPerLeve
++        q << sp->rangeIndex << ",";                             // 43       m_rangeIndex
++        q << sp->speed << ",";                                  // 44       m_speed
++        q << sp->StackAmount << ",";                            // 46       m_cumulativeAura
++        q << sp->Totem[0] << ",";                               // 47-48    m_totem
++        q << sp->Totem[1] << ",";
++        q << sp->Reagent[0] << ",";                             // 49-56    m_reagent
++        q << sp->Reagent[1] << ",";
++        q << sp->Reagent[2] << ",";
++        q << sp->Reagent[3] << ",";
++        q << sp->Reagent[4] << ",";
++        q << sp->Reagent[5] << ",";
++        q << sp->Reagent[6] << ",";
++        q << sp->Reagent[7] << ",";
++        q << sp->ReagentCount[0] << ",";                        // 57-64    m_reagentCount
++        q << sp->ReagentCount[1] << ",";
++        q << sp->ReagentCount[2] << ",";
++        q << sp->ReagentCount[3] << ",";
++        q << sp->ReagentCount[4] << ",";
++        q << sp->ReagentCount[5] << ",";
++        q << sp->ReagentCount[6] << ",";
++        q << sp->ReagentCount[7] << ",";
++        q << sp->EquippedItemClass << ",";                      // 65       m_equippedItemClass (value)
++        q << sp->EquippedItemSubClassMask << ",";               // 66       m_equippedItemSubclass (mask)
++        q << sp->EquippedItemInventoryTypeMask << ",";          // 67       m_equippedItemInvTypes (mask)
++        q << sp->Effect[0] << ",";                              // 68-70    m_effect
++        q << sp->Effect[1] << ",";
++        q << sp->Effect[2] << ",";
++        q << sp->EffectDieSides[0] << ",";                      // 71-73    m_effectDieSides
++        q << sp->EffectDieSides[1] << ",";
++        q << sp->EffectDieSides[2] << ",";
++        q << sp->EffectBaseDice[0] << ",";                      // 74-76    m_effectBaseDice
++        q << sp->EffectBaseDice[1] << ",";
++        q << sp->EffectBaseDice[2] << ",";
++        q << sp->EffectDicePerLevel[0] << ",";                  // 77-79    m_effectDicePerLevel
++        q << sp->EffectDicePerLevel[1] << ",";
++        q << sp->EffectDicePerLevel[2] << ",";
++        q << sp->EffectRealPointsPerLevel[0] << ",";            // 80-82    m_effectRealPointsPerLevel
++        q << sp->EffectRealPointsPerLevel[1] << ",";
++        q << sp->EffectRealPointsPerLevel[2] << ",";
++        q << sp->EffectBasePoints[0] << ",";                    // 83-85    m_effectBasePoints
++        q << sp->EffectBasePoints[1] << ",";
++        q << sp->EffectBasePoints[2] << ",";
++        q << sp->EffectMechanic[0] << ",";                      // 86-88    m_effectMechanic
++        q << sp->EffectMechanic[1] << ",";
++        q << sp->EffectMechanic[2] << ",";
++        q << sp->EffectImplicitTargetA[0] << ",";               // 89-91    m_implicitTargetA
++        q << sp->EffectImplicitTargetA[1] << ",";
++        q << sp->EffectImplicitTargetA[2] << ",";
++        q << sp->EffectImplicitTargetB[0] << ",";               // 92-94    m_implicitTargetB
++        q << sp->EffectImplicitTargetB[1] << ",";
++        q << sp->EffectImplicitTargetB[2] << ",";
++        q << sp->EffectRadiusIndex[0] << ",";                   // 95-97    m_effectRadiusIndex - spellradius.dbc
++        q << sp->EffectRadiusIndex[1] << ",";
++        q << sp->EffectRadiusIndex[2] << ",";
++        q << sp->EffectApplyAuraName[0] << ",";                 // 98-100   m_effectAura
++        q << sp->EffectApplyAuraName[1] << ",";
++        q << sp->EffectApplyAuraName[2] << ",";
++        q << sp->EffectAmplitude[0] << ",";                     // 101-103  m_effectAuraPeriod
++        q << sp->EffectAmplitude[1] << ",";
++        q << sp->EffectAmplitude[2] << ",";
++        q << sp->EffectMultipleValue[0] << ",";                 // 104-106  m_effectAmplitude
++        q << sp->EffectMultipleValue[1] << ",";
++        q << sp->EffectMultipleValue[2] << ",";
++        q << sp->EffectChainTarget[0] << ",";                   // 107-109  m_effectChainTargets
++        q << sp->EffectChainTarget[1] << ",";
++        q << sp->EffectChainTarget[2] << ",";
++        q << sp->EffectItemType[0] << ",";                      // 110-112  m_effectItemType
++        q << sp->EffectItemType[1] << ",";
++        q << sp->EffectItemType[2] << ",";
++        q << sp->EffectMiscValue[0] << ",";                     // 113-115  m_effectMiscValue
++        q << sp->EffectMiscValue[1] << ",";
++        q << sp->EffectMiscValue[2] << ",";
++        q << sp->EffectMiscValueB[0] << ",";                    // 116-118  m_effectMiscValueB
++        q << sp->EffectMiscValueB[1] << ",";
++        q << sp->EffectMiscValueB[2] << ",";
++        q << sp->EffectTriggerSpell[0] << ",";                  // 119-121  m_effectTriggerSpell
++        q << sp->EffectTriggerSpell[1] << ",";
++        q << sp->EffectTriggerSpell[2] << ",";
++        q << sp->EffectPointsPerComboPoint[0] << ",";           // 122-124  m_effectPointsPerCombo
++        q << sp->EffectPointsPerComboPoint[1] << ",";
++        q << sp->EffectPointsPerComboPoint[2] << ",";
++        q << sp->EffectSpellClassMaskA[0] << ",";               // 125-127  m_effectSpellClassMaskA
++        q << sp->EffectSpellClassMaskA[1] << ",";
++        q << sp->EffectSpellClassMaskA[2] << ",";
++        q << sp->EffectSpellClassMaskB[0] << ",";               // 128-130  m_effectSpellClassMaskB
++        q << sp->EffectSpellClassMaskB[1] << ",";
++        q << sp->EffectSpellClassMaskB[2] << ",";
++        q << sp->EffectSpellClassMaskC[0] << ",";               // 131-133  m_effectSpellClassMaskC
++        q << sp->EffectSpellClassMaskC[1] << ",";
++        q << sp->EffectSpellClassMaskC[2] << ",";
++        q << sp->SpellVisual[0] << ",";                         // 134-135  m_spellVisualID
++        q << sp->SpellVisual[1] << ",";
++        q << sp->SpellIconID << ",";                            // 136      m_spellIconID
++        q << sp->activeIconID << ",";                           // 137      m_activeIconID
++        std::string spn = sp->SpellName[0];
++        WorldDatabase.escape_string(spn);
++        WorldDatabase.escape_string(spn);
++        q << "\"" << spn << "\",";                 // 139-154  m_name_lang
++        q << "\"" << sp->Rank[0] << "\",";                      // 156-171  m_nameSubtext_lang
++        q << sp->ManaCostPercentage << ",";                     // 207      m_manaCostPct
++        q << sp->StartRecoveryCategory << ",";                  // 208      m_startRecoveryCategory
++        q << sp->StartRecoveryTime << ",";                      // 209      m_startRecoveryTime
++        q << sp->MaxTargetLevel << ",";                         // 210      m_maxTargetLevel
++        q << sp->SpellFamilyName << ",";                             // 211      m_spellClassSet
++        q << (uint32)(sp->SpellFamilyFlags & UI64LIT(0xFFFFFFFF)) << ",";                      // 212-214  m_spellClassMask NOTE: size is 12 bytes!!!
++        q << (uint32)(sp->SpellFamilyFlags >> 32) << ",";
++        q << sp->SpellFamilyFlags2 << ",";
++        q << sp->MaxAffectedTargets << ",";                     // 215      m_maxTargets
++        q << sp->DmgClass << ",";                               // 216      m_defenseType
++        q << sp->PreventionType << ",";                         // 217      m_preventionType
++        q << sp->DmgMultiplier[0] << ",";                       // 219-221  m_effectChainAmplitude
++        q << sp->DmgMultiplier[1] << ",";
++        q << sp->DmgMultiplier[2] << ",";
++        q << sp->TotemCategory[0] << ",";                       // 225-226  m_requiredTotemCategoryID
++        q << sp->TotemCategory[1] << ",";
++        q << sp->AreaGroupId << ",";                            // 227      m_requiredAreaGroupId
++        q << sp->SchoolMask << ",";                             // 228      m_schoolMask
++        q << sp->runeCostID;                             // 229      m_runeCostID
++
++        q << ");";
++
++        WorldDatabase.Query(q.str().c_str());
++
++    }
++}
+ 
+ /// Initialize the World
+ void World::SetInitialWorldSettings()
+@@ -1525,6 +1870,8 @@ void World::SetInitialWorldSettings()
+     sLog.outString("Starting Autobroadcast system by Xeross..." );
+     sLog.outString("Initialize AuctionHouseBot...");
+     AuctionHouseBotInit();
++    sLog.outString( "Creating database of DBCs..." );
++    DumpSpellData();
+     sLog.outString( "WORLD: World initialized" );
+ }
+ 
