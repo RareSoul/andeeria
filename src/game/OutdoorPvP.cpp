@@ -262,6 +262,7 @@ void OutdoorPvP::DeleteSpawns()
 }
 
 OutdoorPvP::OutdoorPvP()
+: m_Map(NULL)
 {
 }
 
@@ -393,45 +394,29 @@ bool OutdoorPvPObjective::HandleCaptureCreaturePlayerMoveInLos(Player * p, Creat
 
     // check range and activity
     if(cp->IsWithinDistInMap(p,cp->GetGOInfo()->raw.data[0]) && p->IsOutdoorPvPActive())
-    {
         // data[8] will be used for player enter
         return HandleCapturePointEvent(p, cp->GetGOInfo()->raw.data[8]); //i_objective->HandlePlayerEnter((Player*)u);
-    }
     else
-    {
         // data[9] will be used for player leave
         return HandleCapturePointEvent(p, cp->GetGOInfo()->raw.data[9]); //i_objective->HandlePlayerLeave((Player*)u);
-    }
 }
 
 void OutdoorPvP::SendUpdateWorldState(uint32 field, uint32 value)
 {
     // send to both factions
     for(int i = 0; i < 2; ++i)
-    {
         // send to all players present in the area
         for(std::set<uint64>::iterator itr = m_PlayerGuids[i].begin(); itr != m_PlayerGuids[i].end(); ++itr)
-        {
-            Player * plr = objmgr.GetPlayer(*itr);
-            if(plr)
-            {
+            if (Player* plr = objmgr.GetPlayer(*itr))
                 plr->SendUpdateWorldState(field,value);
-            }
-        }
-    }
 }
 
 void OutdoorPvPObjective::SendUpdateWorldState(uint32 field, uint32 value)
 {
     // send to all players present in the area
     for(std::set<uint64>::iterator itr = m_ActivePlayerGuids.begin(); itr != m_ActivePlayerGuids.end(); ++itr)
-    {
-        Player * plr = objmgr.GetPlayer(*itr);
-        if(plr)
-        {
+        if (Player* plr = objmgr.GetPlayer(*itr))
             plr->SendUpdateWorldState(field,value);
-        }
-    }
 }
 
 void OutdoorPvPObjective::SendObjectiveComplete(uint32 id,uint64 guid)
@@ -455,9 +440,7 @@ void OutdoorPvPObjective::SendObjectiveComplete(uint32 id,uint64 guid)
     {
         Player * plr = objmgr.GetPlayer(*itr);
         if(plr && plr->GetTeam() == controlling_faction)
-        {
             plr->KilledMonsterCredit(id,guid);
-        }
     }
 }
 
@@ -485,88 +468,77 @@ void OutdoorPvP::HandleKill(Player *killer, Unit * killed)
             // creature kills must be notified, even if not inside objective / not outdoor pvp active
             // player kills only count if active and inside objective
             if(( pGroupGuy->IsOutdoorPvPActive() && IsInsideObjective(pGroupGuy) ) || killed->GetTypeId() == TYPEID_UNIT)
-            {
                 HandleKillImpl(pGroupGuy, killed);
-            }
         }
     }
     else
     {
         // creature kills must be notified, even if not inside objective / not outdoor pvp active
         if(killer && (( killer->IsOutdoorPvPActive() && IsInsideObjective(killer) ) || killed->GetTypeId() == TYPEID_UNIT))
-        {
             HandleKillImpl(killer, killed);
-        }
     }
 }
 
 bool OutdoorPvP::IsInsideObjective(Player *plr)
 {
     for(OutdoorPvPObjectiveSet::iterator itr = m_OutdoorPvPObjectives.begin(); itr != m_OutdoorPvPObjectives.end(); ++itr)
-    {
         if((*itr)->IsInsideObjective(plr))
             return true;
-    }
+
     return false;
 }
 
 bool OutdoorPvP::HandleCustomSpell(Player *plr, uint32 spellId, GameObject * go)
 {
     for(OutdoorPvPObjectiveSet::iterator itr = m_OutdoorPvPObjectives.begin(); itr != m_OutdoorPvPObjectives.end(); ++itr)
-    {
         if((*itr)->HandleCustomSpell(plr,spellId,go))
             return true;
-    }
+
     return false;
 }
 
 bool OutdoorPvP::HandleOpenGo(Player *plr, uint64 guid)
 {
     for(OutdoorPvPObjectiveSet::iterator itr = m_OutdoorPvPObjectives.begin(); itr != m_OutdoorPvPObjectives.end(); ++itr)
-    {
         if((*itr)->HandleOpenGo(plr,guid) >= 0)
             return true;
-    }
+
     return false;
 }
 
 bool OutdoorPvP::HandleCaptureCreaturePlayerMoveInLos(Player * p, Creature * c)
 {
     for(OutdoorPvPObjectiveSet::iterator itr = m_OutdoorPvPObjectives.begin(); itr != m_OutdoorPvPObjectives.end(); ++itr)
-    {
         if((*itr)->HandleCaptureCreaturePlayerMoveInLos(p, c))
             return true;
-    }
+
     return false;
 }
 
 bool OutdoorPvP::HandleGossipOption(Player * plr, uint64 guid, uint32 id)
 {
     for(OutdoorPvPObjectiveSet::iterator itr = m_OutdoorPvPObjectives.begin(); itr != m_OutdoorPvPObjectives.end(); ++itr)
-    {
         if((*itr)->HandleGossipOption(plr, guid, id))
             return true;
-    }
+
     return false;
 }
 
 bool OutdoorPvP::CanTalkTo(Player * plr, Creature * c, GossipOption &gso)
 {
     for(OutdoorPvPObjectiveSet::iterator itr = m_OutdoorPvPObjectives.begin(); itr != m_OutdoorPvPObjectives.end(); ++itr)
-    {
         if((*itr)->CanTalkTo(plr, c, gso))
             return true;
-    }
+
     return false;
 }
 
 bool OutdoorPvP::HandleDropFlag(Player * plr, uint32 id)
 {
     for(OutdoorPvPObjectiveSet::iterator itr = m_OutdoorPvPObjectives.begin(); itr != m_OutdoorPvPObjectives.end(); ++itr)
-    {
         if((*itr)->HandleDropFlag(plr, id))
             return true;
-    }
+
     return false;
 }
 

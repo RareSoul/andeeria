@@ -191,18 +191,19 @@ bool Creature::InitEntry(uint32 Entry, uint32 team, const CreatureData *data )
         return false;
     }
 
-    // get heroic mode entry
+    // get difficulty 1 mode entry
     uint32 actualEntry = Entry;
     CreatureInfo const *cinfo = normalInfo;
-    if(normalInfo->HeroicEntry)
+    if(normalInfo->DifficultyEntry1)
     {
         //we already have valid Map pointer for current creature!
-        if(GetMap()->IsHeroic())
+        //FIXME: spawn modes 2-3 must have own case DifficultyEntryN
+        if(GetMap()->GetSpawnMode() > 0)
         {
-            cinfo = objmgr.GetCreatureTemplate(normalInfo->HeroicEntry);
+            cinfo = objmgr.GetCreatureTemplate(normalInfo->DifficultyEntry1);
             if(!cinfo)
             {
-                sLog.outErrorDb("Creature::UpdateEntry creature heroic entry %u does not exist.", actualEntry);
+                sLog.outErrorDb("Creature::UpdateEntry creature difficulty 1 entry %u does not exist.", actualEntry);
                 return false;
             }
         }
@@ -831,7 +832,7 @@ void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
                     case GOSSIP_OPTION_AUCTIONEER:
                         break;                              // no checks
                     case GOSSIP_OPTION_OUTDOORPVP:
-                        if ( !sOutdoorPvPMgr.CanTalkTo(pPlayer,this,(*gso)) )
+                        if (!pPlayer->Script_CanTalkTo(this, (*gso)))
                              cantalking = false;
                          break;
                     default:
@@ -926,7 +927,7 @@ void Creature::OnGossipSelect(Player* player, uint32 option)
             break;
         }
         case GOSSIP_OPTION_OUTDOORPVP:
-            sOutdoorPvPMgr.HandleGossipOption(player, GetGUID(), gossip->GossipId);
+            player->Script_HandleGossipOption(GetGUID(), option);
             break;
         case GOSSIP_OPTION_SPIRITHEALER:
             if (player->isDead())
@@ -1970,7 +1971,7 @@ CreatureDataAddon const* Creature::GetCreatureAddon() const
             return addon;
     }
 
-    // dependent from heroic mode entry
+    // dependent from difficulty mode entry
     return ObjectMgr::GetCreatureTemplateAddon(GetCreatureInfo()->Entry);
 }
 

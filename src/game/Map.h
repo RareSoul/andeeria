@@ -33,6 +33,7 @@
 #include "GameSystem/GridRefManager.h"
 #include "MapRefManager.h"
 #include "Utilities/TypeList.h"
+#include "OutdoorPvP.h"
 
 #include <bitset>
 #include <list>
@@ -427,12 +428,17 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
 
         void RemoveFromActive(Creature* obj);
 
+        // OutdoorPvP* GetOutdoorPvP(uint32 zone_id) { return (m_OutdoorPvP.find(zone_id) != m_OutdoorPvP.end()) ? m_OutdoorPvP[zone_id] : NULL; }
+        void AddOutdoorPvP(OutdoorPvP* pvp, uint32 zone_id) { m_OutdoorPvP[zone_id] = pvp; }
+
         Creature* GetCreature(uint64 guid);
         Vehicle* GetVehicle(uint64 guid);
         Pet* GetPet(uint64 guid);
         Creature* GetCreatureOrPetOrVehicle(uint64 guid);
         GameObject* GetGameObject(uint64 guid);
         DynamicObject* GetDynamicObject(uint64 guid);
+        Corpse* GetCorpse(uint64 guid);
+        WorldObject* GetWorldObject(uint64 guid);
 
         TypeUnorderedMapContainer<AllMapStoredObjectTypes>& GetObjectsStore() { return m_objectsStore; }
 
@@ -527,11 +533,14 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
         GridMap *GridMaps[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
         std::bitset<TOTAL_NUMBER_OF_CELLS_PER_MAP*TOTAL_NUMBER_OF_CELLS_PER_MAP> marked_cells;
 
+        std::map<uint32, OutdoorPvP*> m_OutdoorPvP;         // TODO: maybe std::list is enough
+
         std::set<WorldObject *> i_objectsToRemove;
         std::multimap<time_t, ScriptAction> m_scriptSchedule;
 
         // Map local low guid counters
         uint32 m_hiDynObjectGuid;
+        uint32 m_hiPetGuid;
         uint32 m_hiVehicleGuid;
 
         // Type specific code for add/remove to/from grid

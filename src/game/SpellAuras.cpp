@@ -579,7 +579,7 @@ Unit* Aura::GetCaster() const
 
     //return ObjectAccessor::GetUnit(*m_target,m_caster_guid);
     //must return caster even if it's in another grid/map
-    Unit *unit = ObjectAccessor::GetObjectInWorld(m_caster_guid, (Unit*)NULL);
+    Unit *unit = ObjectAccessor::GetUnitInWorld(*m_target,m_caster_guid);
     return unit && unit->IsInWorld() ? unit : NULL;
 }
 
@@ -4433,9 +4433,15 @@ void Aura::HandleAuraModIncreaseFlightSpeed(bool apply, bool Real)
     {
         WorldPacket data;
         if(apply)
+        {
+            ((Player*)m_target)->SetCanFly(true);
             data.Initialize(SMSG_MOVE_SET_CAN_FLY, 12);
+        }
         else
+        {
             data.Initialize(SMSG_MOVE_UNSET_CAN_FLY, 12);
+            ((Player*)m_target)->SetCanFly(false);
+        }
         data.append(m_target->GetPackGUID());
         data << uint32(0);                                      // unknown
         m_target->SendMessageToSet(&data, true);
@@ -4587,8 +4593,7 @@ void Aura::HandleAuraModEffectImmunity(bool apply, bool /*Real*/)
         if( BattleGround *bg = ((Player*)m_target)->GetBattleGround() )
             bg->EventPlayerDroppedFlag(((Player*)m_target));
         else if(OutdoorPvP * pvp = ((Player*)m_target)->GetOutdoorPvP())
-            sOutdoorPvPMgr.HandleDropFlag((Player*)m_target,GetSpellProto()->Id);
-
+            ((Player*)m_target)->Script_HandleDropFlag(GetSpellProto()->Id);
     }
 
     m_target->ApplySpellImmune(GetId(), IMMUNITY_EFFECT, m_modifier.m_miscvalue, apply);
@@ -4745,22 +4750,29 @@ void Aura::HandlePeriodicEnergize(bool apply, bool Real)
     if (!Real)
         return;
 
-    m_isPeriodic = apply;
+    if (apply)
+    {
+        switch (GetId())
+        {
+            case 29166: //Innervate
+            {
+                Player *caster = objmgr.GetPlayer(m_caster_guid);
+                if (caster) m_modifier.m_amount = caster->GetCreateMana() * 45 / 200;
+                break;
+            }
+            case 48391:                                     // Owlkin Frenzy 2% base mana
+                m_modifier.m_amount = m_target->GetCreateMana() * 2 / 100;
+                break;
+            case 57669:                                     // Replenishment (0.25% from max)
+            case 61782:                                     // Infinite Replenishment
+                m_modifier.m_amount = m_target->GetMaxPower(POWER_MANA) * 25 / 10000;
+                break;
+            default:
+                break;
+        }
+    }
 
-	switch(GetId())
-	{
-	case 57669: // Replenishment (0.25% from max)
-	case 61782: // Infinite Replenishment
-		m_modifier.m_amount = m_target->GetMaxPower(POWER_MANA) * 25 / 10000;
-		break;
-	case 48391: //Owlkin Frenzy
-        m_modifier.m_amount = m_target->GetCreateMana() * 2 / 100;
-		break;
-	case 29166: //Innervate
-		Player *caster = objmgr.GetPlayer(m_caster_guid);
-		if (caster) m_modifier.m_amount = caster->GetCreateMana() * 45 / 200;
-		break;
-	}
+    m_isPeriodic = apply;
 }
 
 void Aura::HandleAuraPowerBurn(bool apply, bool /*Real*/)
@@ -6365,10 +6377,16 @@ void Aura::HandleAuraAllowFlight(bool apply, bool Real)
     // allow fly
     WorldPacket data;
     if(apply)
+    {
+        ((Player*)m_target)->SetCanFly(true);
         data.Initialize(SMSG_MOVE_SET_CAN_FLY, 12);
+    }
     else
+    {
         data.Initialize(SMSG_MOVE_UNSET_CAN_FLY, 12);
-    data.append(m_target->GetPackGUID());
+        ((Player*)m_target)->SetCanFly(false);
+    }
+		data.append(m_target->GetPackGUID());
     data << uint32(0);                                      // unk
     m_target->SendMessageToSet(&data, true);
 }
@@ -6646,7 +6664,7 @@ void Aura::HandleSchoolAbsorb(bool apply, bool Real)
             ((m_removeMode == AURA_REMOVE_BY_DEFAULT && !m_modifier.m_amount) || m_removeMode == AURA_REMOVE_BY_DISPEL))
         {
             Unit::AuraList const& vDummyAuras = caster->GetAurasByType(SPELL_AURA_DUMMY);
-            for(Unit::AuraList::const_iterator itr = vDummyAuras.begin(); itr != vDummyAuras.end(); itr++)
+            for(Unit::AuraList::const_iterator itr = vDummyAuras.begin(); itr != vDummyAuras.end(); ++itr)
             {
                 SpellEntry const* vSpell = (*itr)->GetSpellProto();
 
