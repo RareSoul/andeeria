@@ -479,7 +479,7 @@ void Spell::FillCustomTargetMap(uint32 i, UnitList& TagUnitMap)
     // Resulting effect depends on spell that we want to cast
     switch (m_spellInfo->Id)
     {
-        /*case 48743: // Death Pact
+        case 48743: // Death Pact
         {
             Unit* unit_to_add = NULL;
             if (Player* modOwner = m_caster->GetSpellModOwner())
@@ -494,7 +494,7 @@ void Spell::FillCustomTargetMap(uint32 i, UnitList& TagUnitMap)
                     GuardianPetList const& guardians = modOwner->GetGuardians();
                     for (GuardianPetList::const_iterator itr = guardians.begin(); itr != guardians.end(); ++itr)
                     {
-                        Pet* temp_pet = ObjectAccessor::GetPet(*itr);
+                        Pet* temp_pet = modOwner->GetMap()->GetPet(*itr);
                         if(temp_pet && temp_pet->isAlive())
                             if (temp_pet->GetEntry() == 26125 || temp_pet->GetEntry() == 27829)
                             {
@@ -514,7 +514,7 @@ void Spell::FillCustomTargetMap(uint32 i, UnitList& TagUnitMap)
                 }
             }
             break;
-        }*/
+        }
         case 46584: // Raise Dead
         {
             WorldObject* result = FindCorpseUsing <MaNGOS::RaiseDeadObjectCheck>  ();
