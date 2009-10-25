@@ -50,7 +50,7 @@ m_latency(0), m_TutorialsChanged(false)
     {
         m_Address = sock->GetRemoteAddress ();
         sock->AddReference ();
-		loginDatabase.PExecute("UPDATE account SET online = 1, ActiveRealmID = %d WHERE id = %u;", realmID, GetAccountId());
+		loginDatabase.PExecute("UPDATE account SET online = 1 WHERE id = %u;", GetAccountId());
         CharacterDatabase.PExecute("UPDATE characters SET online = 0 WHERE account = %u AND online <> 0;", GetAccountId()); // really need this?
     }
 }
@@ -497,7 +497,7 @@ void WorldSession::SendNotification(const char *format,...)
         data << szStr;
         SendPacket(&data);
     }
-    loginDatabase.PExecute("UPDATE account SET online = 0, ActiveRealmID = 0 WHERE id = %u;", GetAccountId());
+    loginDatabase.PExecute("UPDATE account SET online = 0 WHERE id = %u;", GetAccountId());
     CharacterDatabase.PExecute("UPDATE characters SET online = 0 WHERE account = %u;", GetAccountId());
 }
 
