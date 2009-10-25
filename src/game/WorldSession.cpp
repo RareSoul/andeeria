@@ -241,9 +241,11 @@ bool WorldSession::Update(uint32 /*diff*/)
                             LogUnprocessedTail(packet);
                         break;
                     case STATUS_NEVER:
-                        sLog.outError( "SESSION: received not allowed opcode %s (0x%.4X)",
+						if(sLog.IsLogOpcode()){
+							sLog.outError( "SESSION: received not allowed opcode %s (0x%.4X)",
                             LookupOpcodeName(packet->GetOpcode()),
                             packet->GetOpcode());
+						}
                         break;
                 }
             }
