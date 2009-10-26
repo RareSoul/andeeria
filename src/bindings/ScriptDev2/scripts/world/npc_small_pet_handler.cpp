@@ -95,6 +95,12 @@ enum
 
     NPC_BLIZZARD_BEAR           = 32841,
     SPELL_BLIZZARD_BEAR_SIT     = 61853,
+
+    NPC_MOJO                    = 24480,
+    SPELL_FEELING_FROGGY        = 43906,
+    SPELL_FROG_LOVE             = 62537,
+
+    EMOTE_KISS                  = -1799979
 };
 
 struct MANGOS_DLL_DECL npc_small_pet_handlerAI : public ScriptedAI
@@ -128,6 +134,25 @@ struct MANGOS_DLL_DECL npc_small_pet_handlerAI : public ScriptedAI
     void AttackStart(Unit* who)
     {
         return;
+    }
+
+    void ReceiveEmote(Player* pPlayer, uint32 emote)
+    {
+        if (!pPlayer)
+            return;
+        switch (m_creature->GetEntry())
+        {
+            case NPC_MOJO:
+                if (emote = TEXTEMOTE_KISS)
+                {
+                    m_creature->SetTargetGUID(pPlayer->GetGUID());
+                    DoScriptText(EMOTE_KISS,m_creature,pPlayer);
+                    pPlayer->CastSpell(pPlayer,SPELL_FEELING_FROGGY,true);
+                    DoCast(m_creature,SPELL_FROG_LOVE,true);
+                }
+                break;
+            default: break;
+        }
     }
 
     void UpdateAI(const uint32 uiDiff)
