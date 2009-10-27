@@ -62,97 +62,77 @@ struct MANGOS_DLL_DECL mob_mature_netherwing_drakeAI : public ScriptedAI
 
     uint64 uiPlayerGUID;
 
-    bool bCanEat;
     bool bIsEating;
+    bool bIsFlying;
 
-    uint32 EatTimer;
-    uint32 CastTimer;
+    uint32 m_uiEatTimer;
+    uint32 m_uiFlightTimer;
+    uint32 m_uiCastTimer;
 
     void Reset()
     {
         uiPlayerGUID = 0;
 
-        bCanEat = false;
         bIsEating = false;
+        bIsFlying = false;
 
-        EatTimer = 5000;
-        CastTimer = 5000;
+        m_uiEatTimer = 5000;
+        m_uiFlightTimer = 4000;
+        m_uiCastTimer = 5000;
     }
 
     void SpellHit(Unit* pCaster, SpellEntry const* pSpell)
     {
-        if (bCanEat || bIsEating)
+        if (bIsFlying || bIsEating)
             return;
 
         if (pCaster->GetTypeId() == TYPEID_PLAYER && pSpell->Id == SPELL_PLACE_CARCASS && !m_creature->HasAura(SPELL_JUST_EATEN))
         {
+            float x,y,z;
+            pCaster->GetNearPoint(pCaster,x,y,z,2.0f,2.0f,(6.28 - (pCaster->GetOrientation())) );
+            m_creature->SendMonsterMove(x,y,z,0,MONSTER_MOVE_FLY,m_uiFlightTimer,0);
             uiPlayerGUID = pCaster->GetGUID();
-            bCanEat = true;
+            bIsFlying = true;
         }
     }
 
-    void MovementInform(uint32 type, uint32 id)
+    void UpdateAI(const uint32 uiDiff)
     {
-        if (type != POINT_MOTION_TYPE)
-            return;
-
-        if (id == POINT_ID)
+        if (bIsFlying)
         {
-            bIsEating = true;
-            EatTimer = 7000;
-            m_creature->HandleEmoteCommand(EMOTE_ONESHOT_ATTACKUNARMED);
-        }
-    }
-
-    void UpdateAI(const uint32 diff)
-    {
-        if (bCanEat || bIsEating)
-        {
-            if (EatTimer < diff)
+            if (m_uiFlightTimer <= uiDiff)
             {
-                if (bCanEat && !bIsEating)
-                {
-                    if (Unit* pUnit = Unit::GetUnit(*m_creature, uiPlayerGUID))
-                    {
-                        if (GameObject* pGo = pUnit->GetGameObject(SPELL_PLACE_CARCASS))
-                        {
-                            if (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
-                                m_creature->GetMotionMaster()->MovementExpired();
-
-                            m_creature->GetMotionMaster()->MoveIdle();
-                            m_creature->StopMoving();
-
-                            m_creature->GetMotionMaster()->MovePoint(POINT_ID, pGo->GetPositionX(), pGo->GetPositionY(), pGo->GetPositionZ());
-                        }
-                    }
-                    bCanEat = false;
-                }
-                else if (bIsEating)
-                {
-                    DoCast(m_creature, SPELL_JUST_EATEN);
-                    DoScriptText(SAY_JUST_EATEN, m_creature);
-
-                    if (Player* pPlr = (Player*)Unit::GetUnit((*m_creature), uiPlayerGUID))
-                        pPlr->KilledMonsterCredit(NPC_EVENT_PINGER, m_creature->GetGUID());
-
-                    Reset();
-                    m_creature->GetMotionMaster()->Clear();
-                }
-            }
-            else
-                EatTimer -= diff;
-
-            return;
+                bIsEating = true;
+                bIsFlying = false;
+             }else m_uiFlightTimer -= uiDiff;
         }
 
+        if (bIsEating)
+        {
+            if (m_uiEatTimer <= uiDiff)
+            {
+                DoCast(m_creature, SPELL_JUST_EATEN);
+                DoScriptText(SAY_JUST_EATEN, m_creature);
+
+                if (Player* pPlr = (Player*)Unit::GetUnit((*m_creature), uiPlayerGUID))
+                    pPlr->KilledMonsterCredit(NPC_EVENT_PINGER, m_creature->GetGUID());
+
+                 float x,y,z;
+                 m_creature->GetRespawnCoord(x,y,z);
+                 m_creature->SendMonsterMove(x,y,z,0,MONSTER_MOVE_FLY,5000,0);
+                 bIsEating = false;
+                 Reset();
+            }else m_uiEatTimer -= uiDiff;
+        }
+ 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
-        if (CastTimer < diff)
+        if (m_uiCastTimer < uiDiff)
         {
             DoCast(m_creature->getVictim(), SPELL_NETHER_BREATH);
-            CastTimer = 5000;
-        }else CastTimer -= diff;
+            m_uiCastTimer = 5000;
+        }else m_uiCastTimer -= uiDiff;
 
         DoMeleeAttackIfReady();
     }
