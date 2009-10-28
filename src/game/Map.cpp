@@ -35,7 +35,6 @@
 #include "Group.h"
 #include "MapRefManager.h"
 #include "DBCEnums.h"
-#include "OutdoorPvPMgr.h"
 
 #include "MapInstanced.h"
 #include "InstanceSaveMgr.h"
@@ -62,12 +61,6 @@ Map::~Map()
 
     if(!m_scriptSchedule.empty())
         sWorld.DecreaseScheduledScriptCount(m_scriptSchedule.size());
-
-    // removes the mappointer from an outdoorpvp-class
-    std::map<uint32, OutdoorPvP*>::iterator itr = m_OutdoorPvP.begin();
-    for(; itr != m_OutdoorPvP.end(); ++itr)
-        itr->second->SetMap(NULL);
-
 }
 
 bool Map::ExistMap(uint32 mapid,int gx,int gy)
@@ -225,8 +218,6 @@ Map::Map(uint32 id, time_t expiry, uint32 InstanceId, uint8 SpawnMode, Map* _par
 
     //lets initialize visibility distance for map
     Map::InitVisibilityDistance();
-    // adds the mappointer to an outdoorpvp-class
-    sOutdoorPvPMgr.NotifyMapAdded(this);
 }
 
 void Map::InitVisibilityDistance()
@@ -710,14 +701,6 @@ void Map::Update(const uint32 &t_diff)
     // Send world objects and item update field changes
     SendObjectUpdates();
 
-    // Update OutdoorPvP.
-    if (t_diff < OUTDOORPVP_OBJECTIVE_UPDATE_INTERVAL)
-    {
-        std::map<uint32, OutdoorPvP*>::iterator itr = m_OutdoorPvP.begin();
-        for(; itr != m_OutdoorPvP.end(); ++itr)
-            itr->second->Update(t_diff);
-    }
-
     // Don't unload grids if it's battleground, since we may have manually added GOs,creatures, those doesn't load from DB at grid re-load !
     // This isn't really bother us, since as soon as we have instanced BG-s, the whole map unloads as the BG gets ended
     if (!IsBattleGroundOrArena())
@@ -739,6 +722,11 @@ void Map::Update(const uint32 &t_diff)
 
 void Map::Remove(Player *player, bool remove)
 {
+    if(remove)
+        player->CleanupsBeforeDelete();
+    else
+        player->RemoveFromWorld();
+
     // this may be called during Map::Update
     // after decrement+unlink, ++m_mapRefIter will continue correctly
     // when the first element of the list is being removed
@@ -750,11 +738,6 @@ void Map::Remove(Player *player, bool remove)
     CellPair p = MaNGOS::ComputeCellPair(player->GetPositionX(), player->GetPositionY());
     if(p.x_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP || p.y_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP)
     {
-        if(remove)
-            player->CleanupsBeforeDelete();
-        else
-            player->RemoveFromWorld();
-
         // invalid coordinates
         player->ResetMap();
 
@@ -775,11 +758,6 @@ void Map::Remove(Player *player, bool remove)
     DEBUG_LOG("Remove player %s from grid[%u,%u]", player->GetName(), cell.GridX(), cell.GridY());
     NGridType *grid = getNGrid(cell.GridX(), cell.GridY());
     assert(grid != NULL);
-
-    if(remove)
-        player->CleanupsBeforeDelete();
-    else
-        player->RemoveFromWorld();
 
     RemoveFromGrid(player,grid,cell);
 

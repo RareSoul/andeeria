@@ -52,7 +52,6 @@ class UpdateMask;
 class SpellCastTargets;
 class PlayerSocial;
 class Vehicle;
-class OutdoorPvP;
 
 typedef std::deque<Mail*> PlayerMails;
 
@@ -2091,30 +2090,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool CanCaptureTowerPoint();
 
         /*********************************************************/
-        /***               OUTDOOR PVP SYSTEM                  ***/
-        /*********************************************************/
-
-        /* Handlers */
-
-        bool Script_HandleCaptureCreaturePlayerMoveInLos(Creature* c);
-
-        void Script_HandleGossipOption(uint64 guid, uint32 gossipid);
-
-        bool Script_CanTalkTo(Creature* creature, GossipOption& gso);
-
-        void Script_HandleDropFlag(uint32 spellId);
-
-        bool Script_HandleOpenGo(uint64 guid);
-
-        /* Getters/Setters */
-
-        OutdoorPvP* GetOutdoorPvP() const { return m_OutdoorPvP; }
-        void SetOutdoorPvP(OutdoorPvP* pvp) { m_OutdoorPvP = pvp; }
-
-        // returns true if the player is in active state for outdoor pvp objective capturing, false otherwise
-        bool IsOutdoorPvPActive();
-
-        /*********************************************************/
         /***                    REST SYSTEM                    ***/
         /*********************************************************/
 
@@ -2321,8 +2296,6 @@ class MANGOS_DLL_SPEC Player : public Unit
     protected:
 
         uint32 m_contestedPvPTimer;
-
-        OutdoorPvP* m_OutdoorPvP;
 
         /*********************************************************/
         /***               BATTLEGROUND SYSTEM                 ***/
