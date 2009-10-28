@@ -143,7 +143,7 @@ struct MANGOS_DLL_DECL npc_small_pet_handlerAI : public ScriptedAI
         switch (m_creature->GetEntry())
         {
             case NPC_MOJO:
-                if (emote = TEXTEMOTE_KISS)
+                if (emote == TEXTEMOTE_KISS)
                 {
                     m_creature->SetTargetGUID(pPlayer->GetGUID());
                     DoScriptText(EMOTE_KISS,m_creature,pPlayer);
