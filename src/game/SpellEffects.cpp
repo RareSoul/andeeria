@@ -1238,11 +1238,11 @@ void Spell::EffectDummy(uint32 i)
                     return;
                 }
                 case 46606:                                 // Tillinghast's Plague Canister Dummy
-                {
-                    if (unitTarget && unitTarget->isAlive() && unitTarget->GetTypeId() == TYPEID_UNIT)
+                {                                           // Works only on Proto-Drake Egg
+                    if (unitTarget && unitTarget->GetEntry() == 23777 && unitTarget->isAlive())
                     {                                       // Green Eggs and Whelps: Summon Plagued Proto-Whelp
                         unitTarget->CastSpell(m_caster,43160,true);
-                        ((Creature*)unitTarget)->DealDamage(unitTarget, unitTarget->GetMaxHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+                        unitTarget->DealDamage(unitTarget, unitTarget->GetMaxHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
                     }
                     return;
                 }
