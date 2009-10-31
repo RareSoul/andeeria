@@ -1237,6 +1237,11 @@ void Spell::EffectDummy(uint32 i)
                     m_caster->CastSpell(m_caster, 45088, true);
                     return;
                 }
+                case 48046:                                 // Use Camera
+                {                                           // Iron Dwarf Snapshot Credit
+                    m_caster->CastSpell(m_caster,48047,true);
+                    return;
+                }
                 case 49357:                                 // Brewfest Mount Transformation
                     if (m_caster->GetTypeId() != TYPEID_PLAYER)
                         return;
