@@ -1237,6 +1237,15 @@ void Spell::EffectDummy(uint32 i)
                     m_caster->CastSpell(m_caster, 45088, true);
                     return;
                 }
+                case 46606:                                 // Tillinghast's Plague Canister Dummy
+                {
+                    if (unitTarget && unitTarget->isAlive() && unitTarget->GetTypeId() == TYPEID_UNIT)
+                    {                                       // Green Eggs and Whelps: Summon Plagued Proto-Whelp
+                        unitTarget->CastSpell(m_caster,43160,true);
+                        ((Creature*)unitTarget)->DealDamage(unitTarget, unitTarget->GetMaxHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+                    }
+                    return;
+                }
                 case 48046:                                 // Use Camera
                 {                                           // Iron Dwarf Snapshot Credit
                     m_caster->CastSpell(m_caster,48047,true);
